@@ -2,7 +2,30 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: documentation and design only.** The public repository, 18-issue tracker, rubric audit and earlier ADRs exist. There is no application, installed project dependency, passing application test, deployed service or operational demonstration yet.
+**Status: T04 foundation implemented and locally verified on its feature branch, awaiting PR review.** React, FastAPI and PostgreSQL communicate through a fixed synthetic connectivity check. Alembic migration, five backend tests, two browser tests and container-restart persistence were verified. Request/task workflows, authentication, AI, CI/CD, telemetry and deployment remain future tasks; no full-project completion or points are claimed.
+
+## Run the foundation locally
+
+With Docker Desktop running Linux containers and Python available, generate local configuration once:
+
+```powershell
+python scripts/configure_local.py
+```
+
+Then start the complete T04 foundation with one command:
+
+```powershell
+docker compose up --build
+```
+
+Open [http://127.0.0.1:8080](http://127.0.0.1:8080) and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL is private. Authentication is T06, so this is a local review foundation rather than a public demo.
+
+```powershell
+docker compose --profile test run --build --rm test
+python scripts/verify_persistence.py
+```
+
+Actual results: **5 backend tests passed** against isolated PostgreSQL; **2 browser checks passed** in installed Edge; the same database row survived db/API restart. Clean tracked-source startup was also exercised in a separate Compose project. See [verified instructions](docs/development.md) and the [T04 evidence/failures record](docs/t04-verification.md) for exact scope, warnings, optional browser commands and stopping/resuming without deleting data.
 
 ## Problem and expected behavior
 
@@ -44,6 +67,7 @@ Docker Compose will start the full demonstration stack with one command. GitHub 
 ## Documentation and tracker
 
 - [Specification and measurable acceptance criteria](docs/specification.md)
+- [Verified local foundation commands](docs/development.md) and [T04 verification record](docs/t04-verification.md)
 - [Minimal architecture](docs/architecture.md) and [ADR index](docs/adr/README.md)
 - [Roadmap](docs/plan.md) and [T01–T18 backlog](docs/backlog.md)
 - [Coding-agent team](docs/agent-team.md) and [AGENTS.md](AGENTS.md)
@@ -51,6 +75,6 @@ Docker Compose will start the full demonstration stack with one command. GitHub 
 - [Grading checklist](docs/grading-checklist.md) and [Module 5 checklist](docs/module5-checklist.md)
 - [Public repository](https://github.com/chakirou18/AI-OfficeFlow) and [issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues)
 
-All startup/test commands are still **planned**, not working instructions. The grading checklist links the pinned official sources and distinguishes documentary evidence from unverified runtime requirements. The full target includes correlated stored metrics/traces/logs, a user-impact alert, and an automatically triggered on-call agent that actually repairs a controlled incident. These have not been demonstrated.
+The foundation commands above are verified; later feature/operational commands remain planned until tested. The grading checklist distinguishes T04 evidence from the unfinished full application. The full target includes correlated stored metrics/traces/logs, a user-impact alert, and an automatically triggered on-call agent that actually repairs a controlled incident. These have not been demonstrated. No GitHub Actions workflow or public deployment is included in T04.
 
 All seven Module 5 Agent Extension Pack requirements remain required; Module 5 has no separate graded homework. **Three peer reviews are mandatory to pass**, independently of the project score. Deployment URLs, CI badges, test results and demonstration recordings will be added only after they exist.

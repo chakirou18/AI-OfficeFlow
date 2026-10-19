@@ -1,6 +1,8 @@
 # Minimal final-project architecture
 
-Owner: [T03](https://github.com/chakirou18/AI-OfficeFlow/issues/3). Current decision: [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). Older ADRs 0001–0009 are superseded design history, not implementation requirements. All runtime behavior here is planned.
+Owner: [T03](https://github.com/chakirou18/AI-OfficeFlow/issues/3). Current decision: [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). Older ADRs 0001–0009 are superseded design history, not implementation requirements. This is target design except for the explicitly verified T04 foundation below.
+
+T04 implementation note: the four-service local foundation (frontend, API, PostgreSQL and one-shot migration) is implemented and verified on its feature branch. It exposes only health and fixed synthetic `foundation_checks` save/read endpoints. [development.md](development.md) gives working commands; [t04-verification.md](t04-verification.md) records tests, real restart persistence and clean-source startup. The application entities/flows, sessions, analysis and telemetry/on-call architecture below remain target design, not implemented T04 features.
 
 ## Components and flow
 

@@ -1,6 +1,6 @@
 # Product specification
 
-Owner: [T01](https://github.com/chakirou18/AI-OfficeFlow/issues/1). Current scope supersedes the earlier pilot/enterprise specification under [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). This is a requirements document; no application behavior or test is verified.
+Owner: [T01](https://github.com/chakirou18/AI-OfficeFlow/issues/1). Current scope supersedes the earlier pilot/enterprise specification under [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). The product stories below remain requirements, not completed features. T04's separate fixed-payload health/connectivity foundation has verified tests and persistence evidence in [t04-verification.md](t04-verification.md); it does not implement request/task/AI/approval stories.
 
 ## Scope and users
 
