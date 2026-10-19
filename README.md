@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: authenticated foundation and request/task API implemented.** T04-T06 are merged; T07 adds immutable requests and stored task-state updates. Required CI verifies 10 unit and 39 PostgreSQL integration tests plus lint and the typechecked frontend build. Three authenticated browser checks and real container-restart persistence are verified. Request-management UI, AI/approval workflows, deployment and telemetry remain later tasks; no full-project completion or grading points are claimed.
+**Status: request management UI and dashboard implemented (T08).** The authenticated React workspace supports request creation, list/detail, pagination, status filters, persisted task updates and PostgreSQL-backed dashboard counts. System health preserves the foundation check. Analysis/human approval, deployment and telemetry remain later tasks; no grading points are claimed.
 
 ## Run the foundation locally
 
@@ -18,7 +18,7 @@ Then start the complete T04 foundation with one command:
 docker compose up --build
 ```
 
-Create a controlled account using the command below, open [http://127.0.0.1:8080](http://127.0.0.1:8080), sign in, and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL and operations routes are excluded from the frontend proxy. Public HTTPS deployment remains T16.
+Create a controlled account using the command below, open [http://127.0.0.1:8080](http://127.0.0.1:8080), sign in, and use the dashboard or request register. Open **System health** and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL and operations routes are excluded from the frontend proxy. Public HTTPS deployment remains T16.
 
 ```powershell
 docker compose --profile test run --build --rm test
@@ -92,3 +92,6 @@ No default password or public signup is provided.
 The authenticated [request/task API](docs/development.md#request-and-task-api-t07)
 now supports immutable request creation, pagination/detail and persisted task open/done
 updates. Request-management UI, analysis and human approval remain later tasks.
+
+
+T08 browser verification: `python scripts/test_browser.py` starts a separate test-only Compose project, seeds guarded synthetic fixtures and runs Playwright. See [the isolated browser setup](docs/development.md#request-workspace-and-isolated-browser-tests-t08).

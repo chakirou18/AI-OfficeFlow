@@ -80,6 +80,35 @@ def serialize_request(record: CustomerRequest, status: str):
 router = APIRouter(prefix="/api/v1", dependencies=[Depends(current_user)])
 
 
+class DashboardResponse(BaseModel):
+    total_requests: int
+    requests_by_status: dict[RequestStatus, int]
+    total_tasks: int
+    open_tasks: int
+    completed_tasks: int
+    recent_requests: list[RequestResponse]
+    recent_tasks: list[TaskResponse]
+
+
+@router.get("/dashboard", response_model=DashboardResponse)
+def dashboard(db: Session = Depends(session)):
+    # A repeatable-read transaction keeps all aggregates/recent rows consistent.
+    db.connection(execution_options={"isolation_level": "REPEATABLE READ"})
+    derived = status_expression()
+    counts = dict(db.execute(select(derived, func.count()).select_from(CustomerRequest).group_by(derived)).all())
+    states = {state: counts.get(state, 0) for state in ("new", "awaiting_review", "in_progress", "completed")}
+    task_counts = dict(db.execute(select(Task.state, func.count()).group_by(Task.state)).all())
+    rows = db.execute(select(CustomerRequest, derived)
+                      .order_by(CustomerRequest.created_at.desc(), CustomerRequest.id.desc()).limit(5)).all()
+    return {
+        "total_requests": sum(states.values()), "requests_by_status": states,
+        "total_tasks": sum(task_counts.values()), "open_tasks": task_counts.get("open", 0),
+        "completed_tasks": task_counts.get("done", 0),
+        "recent_requests": [serialize_request(record, state) for record, state in rows],
+        "recent_tasks": db.scalars(select(Task).order_by(Task.updated_at.desc(), Task.id.desc()).limit(5)).all(),
+    }
+
+
 @router.post("/requests", response_model=RequestDetail, status_code=201)
 def create_request(payload: RequestInput, user: DemoUser = Depends(require_mutation), db: Session = Depends(session)):
     record = CustomerRequest(title=payload.title, description=payload.description,
