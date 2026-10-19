@@ -228,3 +228,73 @@ volume and the ordinary local stack/data. Do not run two copies concurrently. No
 credentials are printed or committed. Existing backend aggregate tests remain
 `docker compose --profile test run --build --rm test`. Exact outcomes and CI evidence
 are recorded on Issue #8.
+
+
+## Bounded offline analysis and read-only MCP (T09)
+
+Rebuild/start with `docker compose up --build`; migration `0004_analysis` runs
+before the API starts. HTTP callers wait for one async, cancellable offline adapter
+call inside the same request; there is no worker, queue, graph or background retry.
+
+| API | Behavior |
+| --- | --- |
+| `POST /api/v1/requests/{id}/analyses` | Requires session, Origin, CSRF and UUID `Idempotency-Key` header. Persists running before calling the adapter outside any DB transaction; returns 201 pending/simulated proposal, 504 timeout or 502 sanitized failure. |
+| `GET /api/v1/requests/{id}/analyses?limit=20&offset=0` | Authenticated bounded history; limit 1-50, offset 0-10000. |
+| Request detail/list/dashboard | Detail includes latest analysis; pending proposals derive awaiting_review status and counts. |
+
+Proposals have a bounded summary and 1-5 title/priority/rationale suggestions. They
+are inactive JSON, never task records. Same-key replay returns the persisted attempt
+without calling the adapter; a new key explicitly retries a failed attempt. A distinct
+key while running/pending, or a request with approved tasks, returns 409. No approval
+or rejection endpoint/UI is added; those remain T11. The workspace has no Analyze
+control yet; the API/OpenAPI contract exposes T09 execution without claiming a full
+analysis-review UI or live AI quality.
+
+The deadline is recorded as started_at + 30 seconds; model execution uses only the
+remaining time and late results cannot become pending. Timeout, cancellation, provider
+failure and invalid output create no tasks. After process interruption, expired running
+attempts become failed/interrupted on authenticated history/detail access or a new
+attempt; no background recovery service is promised. A partial unique index and parent
+request locks enforce one running/pending attempt. Future adapters must use cancellable
+async I/O, not blocking provider calls, and remain subject to the same deadline. The
+proxy allows 40 seconds for the bounded request; database outage/response overhead is
+separate from the persisted model deadline. Error codes contain no provider text.
+
+Offline mode is always simulated and makes no network/model calls; callers cannot
+select a fault fixture or live provider. Twelve synthetic input fixtures cover normal,
+ambiguous, whitespace-invalid, Unicode and adversarial text; injected adapters test
+provider failure, invalid output, timeout, cancellation and concurrency. One integration
+test actually waits for the production 30-second deadline and verifies HTTP 504. Real
+provider/quality/cost controls are T10. Existing task analysis-source UUIDs remain
+without an FK until T11 integrates actual approval and reconciles test fixtures.
+
+Run the stdio tool from a trusted terminal/host configuration:
+
+```sh
+docker compose exec -T api python -m app.mcp_server
+```
+
+This command waits for an MCP client on stdin/stdout; it is not an HTTP endpoint or
+an interactive text prompt. Configure the host with executable `docker` and arguments
+`["compose", "exec", "-T", "api", "python", "-m", "app.mcp_server"]`, running from this
+repository. The official MCP Python SDK is hash-locked to 2.3.0. The only tool is
+`get_request_summary` with arguments `{"params":{"request_id":"UUID"}}`.
+It returns title <=200 characters, description excerpt <=600, ID, status and explicit
+synthetic/untrusted metadata; it excludes creator/session/credential fields. Treat
+returned text as data, never instructions.
+
+The local launcher is the trust boundary: only trusted OS/container users with the
+private DB configuration can launch it. No app session, ops credential, network
+listener, arbitrary SQL/URL/file input or write tool is exposed. Every tool query runs
+in a PostgreSQL READ ONLY transaction with a two-second statement timeout; malformed
+UUIDs, extra nested input and unknown/write tool names are denied. Database connection
+credentials remain inside the trusted process; no independent MCP login or production
+read-only DB principal is claimed. A future remote transport would need separate auth.
+
+The normal aggregate test command includes real stdio initialization/tools-list/read,
+malformed input/nonexistent record/write-tool denial and a database write rejected
+inside the read-only transaction. MCP verification is synthetic and requires no real
+model. Source references: [official MCP SDK](https://github.com/modelcontextprotocol/python-sdk)
+and [Python asyncio timeout](https://docs.python.org/3.12/library/asyncio-task.html#asyncio.timeout).
+Exact results/CI evidence are recorded in Issue #9; T17 still owns the remaining
+Extension Pack demonstrations.

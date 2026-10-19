@@ -9,7 +9,8 @@ from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.auth import current_user, require_mutation
-from app.models import CustomerRequest, DemoUser, Task
+from app.models import AnalysisRun, CustomerRequest, DemoUser, Task
+from app.analysis import AnalysisResponse, expire_interrupted
 
 RequestStatus = Literal["new", "awaiting_review", "in_progress", "completed"]
 
@@ -52,6 +53,7 @@ class RequestResponse(BaseModel):
 
 class RequestDetail(RequestResponse):
     tasks: list[TaskResponse]
+    analysis: AnalysisResponse | None = None
 
 
 class RequestPage(BaseModel):
@@ -69,8 +71,8 @@ def session(request: Request):
 def status_expression():
     has_open = select(Task.id).where(Task.request_id == CustomerRequest.id, Task.state == "open").exists()
     has_tasks = select(Task.id).where(Task.request_id == CustomerRequest.id).exists()
-    # Awaiting-review derives from analysis_runs in T09; no pending proposals exist in T07.
-    return case((has_open, "in_progress"), (has_tasks, "completed"), else_="new")
+    has_pending = select(AnalysisRun.id).where(AnalysisRun.request_id == CustomerRequest.id, AnalysisRun.state == "pending").exists()
+    return case((has_open, "in_progress"), (has_tasks, "completed"), (has_pending, "awaiting_review"), else_="new")
 
 
 def serialize_request(record: CustomerRequest, status: str):
@@ -139,11 +141,15 @@ def request_detail(request_id: UUID, db: Session = Depends(session)):
     record = db.get(CustomerRequest, request_id)
     if not record:
         raise HTTPException(404, "Request not found")
+    expire_interrupted(db, request_id)
+    db.commit()
+    analysis = db.scalar(select(AnalysisRun).where(AnalysisRun.request_id == request_id)
+                         .order_by(AnalysisRun.started_at.desc(), AnalysisRun.id.desc()).limit(1))
     tasks = db.scalars(select(Task).where(Task.request_id == request_id)
                        .order_by(Task.created_at, Task.id)).all()
     # Derive from the returned task snapshot, even if a concurrent update commits.
-    status = "in_progress" if any(task.state == "open" for task in tasks) else "completed" if tasks else "new"
-    return serialize_request(record, status) | {"tasks": tasks}
+    status = "in_progress" if any(task.state == "open" for task in tasks) else "completed" if tasks else "awaiting_review" if analysis and analysis.state == "pending" else "new"
+    return serialize_request(record, status) | {"tasks": tasks, "analysis": analysis}
 
 
 @router.patch("/requests/{request_id}/tasks/{task_id}", response_model=TaskResponse,
