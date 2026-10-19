@@ -2,7 +2,7 @@
 
 ## Current state and scope
 
-AI OfficeFlow is in the documentation and project-governance phase. The Git repository and public GitHub issue tracker exist. No application code, dependencies, tests, or application deployment exist. Do not describe planned capabilities as implemented. Application development, dependency installation, and deployment require a subsequent authorized task; current work covers documentation and tracker setup.
+AI OfficeFlow is in the governance and architecture-design phase. The Git repository, public tracker and preliminary ADRs exist. T01/T02 governance reviews are complete for a generic synthetic-only prototype; all Entropie assumptions A01–A06 remain provisional. No application code, dependencies, tests or application deployment exist. Do not describe design choices as implemented or company-approved. Application development, dependency installation and deployment require a subsequent authorized task; current work covers documentation, governance and design only.
 
 Read the working tree before changing it. Preserve unrelated user edits and existing files. Keep changes focused on the active task and its acceptance criteria. Use English for documentation, identifiers, and comments.
 
@@ -11,18 +11,19 @@ Read the working tree before changing it. Preserve unrelated user edits and exis
 - [README](README.md): purpose, users, scope, status.
 - [Specification](docs/specification.md): lifecycle and measurable requirements.
 - [Architecture](docs/architecture.md): components, flows, reliability, open decisions.
-- [Plan](docs/plan.md): milestones and provisional assessment mapping.
+- [Plan](docs/plan.md): milestones, official assessment mapping and implementation/approval gates.
 - [Backlog](docs/backlog.md): stable task identifiers, dependencies, exact public issue links, labels, and status workflow.
 - [Agent team](docs/agent-team.md): coding responsibilities and handoffs.
 - [Permissions](docs/permissions.md): secrets, customer data, approvals, operational boundaries.
 - [Grading checklist](docs/grading-checklist.md): official 12-criterion / 24-point evidence map, audit gaps and mandatory three peer reviews.
 - [Module 5 checklist](docs/module5-checklist.md): seven Extension Pack artifacts and planned demonstration; no separate graded homework.
+- [ADR index](docs/adr/README.md): numbered technical decisions, alternatives, costs, security implications and unresolved approvals.
 
-Read only the additional context relevant to a task. Record significant architecture choices in numbered ADRs under `docs/decisions/` when implementation begins; no ADRs exist yet.
+Read only the additional context relevant to a task. Record significant architecture choices in numbered ADRs under `docs/adr/`; read relevant existing ADRs before implementation and supersede them explicitly if the design changes. This is the canonical decision directory; the previously planned `docs/decisions/` path was never created.
 
 ## Proposed implementation conventions
 
-- Frontend: React with TypeScript; keep API access and domain views separate.
+- Frontend: React with TypeScript and Vite; keep API access and domain views separate.
 - Backend: Python/FastAPI, typed request/response schemas; separate routes, domain services, persistence, agent orchestration, and tools.
 - PostgreSQL changes require versioned migrations. Approval and audit writes share a transaction.
 - Agent outputs require schema validation, source revision, explicit unknowns, and prompt/graph version metadata.
@@ -61,7 +62,7 @@ Run none of these as if they already work. Implement the associated files and ve
 
 ## Coding-agent responsibilities
 
-Before claiming assessment readiness, check every criterion and its actual evidence in the grading checklist, the seven Module 5 items, and three mandatory peer-review submissions. Role descriptions do not prove a registered specialized subagent, and planned commands do not prove working behavior. Pilot assumptions in the specification require explicit confirmation; a technical audit is not company approval.
+Before claiming assessment readiness, check every criterion and its actual evidence in the grading checklist, the seven Module 5 items, and three mandatory peer-review submissions. Role descriptions do not prove a registered specialized subagent, and planned commands do not prove working behavior. Pilot assumptions have an explicitly accepted prototype deferral, not company confirmation. Real data/company connections and operational fault injection remain unauthorized. Live model services, nonzero spending and paid/public hosting require explicit product-owner decisions; local tests default to the deterministic stub.
 
 The lead coordinates scope and evidence; product/architecture roles maintain requirements and ADRs; frontend/backend roles implement the approved slice; the agent/tools role owns graph and MCP boundaries; QA/security and platform roles verify behavior and operations. These are responsibilities, not a requirement to run multiple agents. Do not spawn or delegate to other agents unless the user explicitly requests it. See [agent-team.md](docs/agent-team.md) for handoffs.
 

@@ -2,6 +2,8 @@
 
 Status: intended policy for implementation. Controls described here are requirements, not deployed safeguards.
 
+The product owner has accepted a generic SME prototype using synthetic data only and explicitly deferred A01–A06 company validation. No real company connections, real customer processing or operational fault-injection authorization is granted. [ADRs](adr/README.md) define preliminary sessions/RBAC, scoped MCP, live-model budgets and hosting boundaries. Design acceptance does not authorize application implementation, paid provisioning, API spend or an operational exercise.
+
 ## Secrets and sensitive data
 
 Use synthetic requests for development, automated tests, screenshots, public issues, and demonstrations. Customer names, email addresses, phone numbers, addresses, site details, commercial information, and request bodies may be sensitive. Store only fields needed for the workflow; do not collect identity documents, payment credentials, or unrelated sensitive information.
@@ -38,7 +40,7 @@ Operational approval is separate: an operator approves one specific staging reco
 
 An authenticated alert receiver must automatically wake the responder and deduplicate repeated incidents. Wake-up and read-only diagnosis do not authorize mutation: the agent waits for approval and then executes the exact allowlisted staging reset itself. A human performing the repair or manually starting the agent is not the intended alert-driven repair evidence. Production deployment remains a separate manually initiated, authorized release workflow; automatic dev deployment cannot promote itself to production.
 
-The Module 5 coding-agent reviewer and MCP client require separate scoped identities and an executable guardrail as planned in [module5-checklist.md](module5-checklist.md). Current team role descriptions do not establish registered subagents or enforced hooks. Any later subagent demonstration still requires explicit user authorization. Pilot assumptions and permission ownership remain pending in the [specification](specification.md#pilot-assumptions-requiring-confirmation).
+The Module 5 coding-agent reviewer and MCP client require separate scoped identities and an executable guardrail as planned in [module5-checklist.md](module5-checklist.md). Current team role descriptions do not establish registered subagents or enforced hooks. Any later subagent demonstration still requires explicit user authorization. Pilot assumptions and company-specific permission ownership remain provisional under the accepted prototype deferral in the [specification](specification.md#pilot-assumptions-requiring-confirmation).
 
 ## Untrusted content and model boundaries
 

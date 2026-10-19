@@ -1,6 +1,6 @@
 # Implementation backlog
 
-The [public GitHub issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) contains one issue for every stable task ID T01–T18. All tasks remain open. T01 has undergone a requirements audit with pilot confirmation still pending; T02 has partial tracker-setup evidence. GitHub holds the live status labels. No application acceptance criteria are claimed complete. Dependencies mean prerequisites for completion; independent preparation may start earlier.
+The [public GitHub issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) contains one issue for every stable task ID T01–T18. T01/T02 are closed after acceptance review of the explicit prototype deferral and tracker setup/use evidence. T03 has a preliminary architecture and ADRs but remains open for live provider/model/budget and public-hosting selection/review. GitHub holds the live state labels. No application acceptance criteria are claimed complete. Dependencies mean prerequisites for completion; independent preparation may start earlier.
 
 Use the public tracker actively throughout development. Before implementing work, read and reference its issue, acceptance criteria, dependencies, and latest comments. Record progress, blockers, decisions/ADRs, exact check commands and outcomes, commit/PR links, and completion evidence in the issue. Keep this backlog and issue scope synchronized. A list of newly created issues alone is not evidence of sustained tracker use.
 
@@ -23,9 +23,9 @@ Existing GitHub default labels are preserved. Milestones group work; labels prov
 4. **In review:** keep the issue open with `status:in-review` when changes and evidence are ready. Record exact tests/checks, results, limitations, decisions and artifact links. Unrun checks must be identified as unrun.
 5. **Done:** only after all acceptance criteria and completion dependencies are satisfied and reviewed, check off supported criteria, record the completion evidence, apply `status:done`, and close as completed. Reopen with an appropriate open status if completion is invalidated.
 
-Partial completion remains open. Avoid automatic closing keywords when criteria remain unmet. T02 remains in progress because T01 validation and evidence of ongoing tracker use are still outstanding; tracker preparation does not waive those requirements.
+Partial completion remains open. Avoid automatic closing keywords when criteria remain unmet. T01's accepted deferral resolved its requirements-review blocker; T02 was subsequently reviewed against all four original setup criteria, including actual issue/comment/commit activity, and closed. Continued tracker use remains a development obligation, not a claim that future implementation has already happened.
 
-The [T02 setup evidence comment](https://github.com/chakirou18/AI-OfficeFlow/issues/2#issuecomment-6268487143) records issue creation, preserved criteria/dependencies, label and milestone setup, verification outcomes, and remaining gaps. It is partial evidence, not a completion claim.
+The [T02 setup evidence comment](https://github.com/chakirou18/AI-OfficeFlow/issues/2#issuecomment-6268487143) records the original partial setup evidence; later final-review comments on T01/T02 record their completion. The [accepted prototype decision commit](https://github.com/chakirou18/AI-OfficeFlow/commit/07533006ff58f1de2d25717452b92a1e37abedaa) explicitly preserves provisional company assumptions and defers real data, integrations and operational exercise authorization.
 
 ## Task-to-issue mapping
 
@@ -71,3 +71,11 @@ The [grading checklist](grading-checklist.md) now maps all official twelve crite
 | T18 / #18 | Audit actual evidence for all 12 criteria and all seven Module 5 items; record course-platform confirmation for three distinct mandatory peer reviews before claiming course completion. Keep platform-sensitive review details private. |
 
 The T01 pilot assumption register is in [specification.md](specification.md#pilot-assumptions-requiring-confirmation). The product owner has now accepted a generic synthetic-only prototype with all A01–A06 provisional, real data/company connections deferred and fault-injection authorization deferred. This explicitly accepted deferral satisfies the pilot-review gate without company sign-off. Review and record T01 completion first, then review T02's original four criteria using actual tracker activity; see the public issues for current states.
+
+## T03 architecture evidence and next slice
+
+Nine [ADRs](adr/README.md) cover stack, database/jobs, sessions/approval, LangGraph/MCP, model abstraction/budgets, telemetry/alerting, CI/CD/hosting/rollback, tests/stages and coding-agent packaging. [architecture.md](architecture.md) defines components, proposed interfaces, flow and entities. Each ADR includes alternatives, benefits/trade-offs, costs and security consequences. These are design artifacts; no executable files or runtime evidence exist.
+
+T03's trade-off documentation criterion is supported. Final live model/provider and public-hosting selections are deliberately not marked complete: they require product-owner approval and current budget/data-handling review. Local stub mode, local Compose and the other preliminary design choices can guide future authorized independent T04 preparation. Do not close T03 or T04 on proposed runtime evidence or waive their existing dependency.
+
+T04 preparation should create the minimal repository structure, version-pinned frontend/backend setup, PostgreSQL/migrations/health, worker/MCP skeleton, deterministic stub and isolated test contract in a later authorized implementation task. No model key, paid host, real company connection or operational exercise is needed for that slice. Finish the T03 approval gates before accepting T04 as complete. All original task IDs and scope above are retained.

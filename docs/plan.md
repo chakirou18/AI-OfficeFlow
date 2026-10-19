@@ -1,6 +1,6 @@
 # Incremental implementation roadmap
 
-Status: application implementation remains planned. Documentation, the public Git repository, and the [issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) are available. T01–T18 have phase milestones and are linked in [the backlog](backlog.md). The official rubric and Module 5 requirements have been source-checked under T01; pilot assumptions remain pending, so M0 and T01 are not complete. Milestones are ordered by dependencies, not committed dates.
+Status: application implementation remains planned. T01/T02 are complete as requirements review and tracker setup for the accepted generic synthetic-only prototype. A01–A06 remain provisional; no company validation is implied. T03 now has nine [ADRs](adr/README.md) and a detailed [architecture](architecture.md); live provider/model/budget and public-hosting selection remain open, so M0 is not fully complete. Milestones are ordered by dependencies, not committed dates.
 
 | Milestone | Scope | Exit evidence |
 | --- | --- | --- |
@@ -42,5 +42,9 @@ The [Module 5 checklist](module5-checklist.md) maps all seven required Extension
 The product owner has accepted the [synthetic-only generic prototype boundary](specification.md#pilot-assumptions-requiring-confirmation), explicitly deferring all A01–A06 stakeholder validation. This satisfies the T01 pilot-review gate without claiming Entropie approval. Record T01 completion before reviewing T02. T03 design proceeds under that boundary; real customer data and operational fault-injection authorization remain deferred.
 
 ## Delivery discipline
+
+The local design baseline is React/TypeScript/Vite, FastAPI, PostgreSQL, a separate leased-job worker, bounded LangGraph, read-only MCP, server-side sessions/RBAC and transactional approvals. Stub model mode avoids external credentials/spend. OTel Collector/Prometheus/Loki/Tempo/Grafana and Alertmanager are designed for a later observability profile. See ADRs 0001–0009 for alternatives and consequences.
+
+Next gate: review T03's preliminary choices and approve a live provider/model/budget plus a public-hosting approach before final service selection or provisioning. T03 remains open. T04's local offline scaffold is the recommended next implementation slice after explicit implementation authorization; independent preparation may start without paid services, but its existing T03 completion dependency remains. Build PR CI early in T05, then T06 access, T07/T08 requests/UI, T09/T10 graph/tools, T11/T12 approval/tests, T13/T14 telemetry/alerts and T15 recovery only after separate A06 exercise authorization. T16 retains automatic dev/manual production and rollback gates; T17/T18 retain seven extension demonstrations and three peer reviews. Do not infer authorization to implement from this design roadmap.
 
 Move one demonstrable vertical slice through implementation, tests, documentation, and review before expanding scope. Use deterministic provider stubs in CI and separate opt-in live model evaluations. Attach actual evidence to public issues, use synthetic data in screenshots, and record known gaps honestly. A milestone is complete only after its exit evidence exists.

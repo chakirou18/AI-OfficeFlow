@@ -2,13 +2,13 @@
 
 AI OfficeFlow is a planned, production-oriented administrative workflow platform for small and medium-sized businesses. It is being developed for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**.
 
-**Current status: documentation phase.** There is no application, dependency installation, test result, deployment, or operational evidence yet. All architecture and technology choices below are proposals unless explicitly recorded otherwise.
+**Current status: governance and architecture design.** T01/T02 reviews are complete for a generic synthetic-only prototype; the [ADRs](docs/adr/README.md) record preliminary technical choices and unresolved approval gates under T03. No application, dependency installation, passing application tests, deployment or operational evidence exists yet.
 
 ## Problem
 
 Customer requests often arrive as incomplete, unstructured messages. Employees must interpret them, collect missing details, assign work, and follow up across disconnected tools. This creates repetitive work, inconsistent handoffs, and limited visibility into progress.
 
-The first intended pilot is **Entropie Energies**, operating in energy and photovoltaics. Pilot workflows and sample data still require validation with the business. The core model will use configurable business profiles rather than hard-coded energy-sector rules.
+**Entropie Energies**, operating in energy and photovoltaics, is a proposed pilot use case. The product owner has chosen a generic SME prototype using synthetic data only. All six pilot assumptions remain provisional; no Entropie business workflow is approved and no real company system will be connected. Real customer data and operational fault-injection authorization are deferred. The core model uses configurable business profiles rather than hard-coded energy-sector rules.
 
 ## Proposed solution and users
 
@@ -50,12 +50,13 @@ flowchart LR
     Telemetry --> Monitoring[Prometheus and Grafana]
 ```
 
-LangGraph is the initial orchestration candidate; DeepAgents remains an alternative to evaluate. Docker Compose will support local services, GitHub Actions will run checks and deployment workflows, and a constrained on-call agent will demonstrate recovery from a controlled failure. None of these components exists yet.
+The preliminary design selects React/TypeScript/Vite, FastAPI, PostgreSQL and a bounded LangGraph workflow with read-only MCP tools. A deterministic model stub is the default; no live provider/model or spending budget is approved. Docker Compose will support local services; GitHub Actions will target automatic dev deployment and manual production promotion. OpenTelemetry, Prometheus, Loki, Tempo and Grafana will collect/store/display correlated signals. A constrained alert-driven recovery demonstration is designed but requires later exercise authorization. None of these runtime components exists yet; public hosting remains an approval gate.
 
 ## Documentation
 
 - [Specification and acceptance criteria](docs/specification.md)
 - [Architecture and data flow](docs/architecture.md)
+- [Architecture decision records](docs/adr/README.md)
 - [Incremental implementation roadmap](docs/plan.md)
 - [Numbered backlog and dependencies](docs/backlog.md)
 - [Coding-agent team](docs/agent-team.md)

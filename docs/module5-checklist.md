@@ -6,6 +6,8 @@ Source: official [Module 5 deliverable and demo](https://github.com/DataTalksClu
 
 Only documentation is implemented. Paths marked **proposed** below do not exist and must not be advertised as working commands, registered subagents, installed plugins, or available MCP tools.
 
+[ADR 0009](adr/0009-coding-agent-extension-pack.md) records the portable package/reviewer design, alternatives, costs and security boundaries. The concrete runtime/manifest binding remains a T17 selection; no installed coding tool is assumed to support an invented package format. All proposed executable paths below remain absent.
+
 | Requirement | Existing or proposed artifact | Responsible tasks | Demonstration and acceptance evidence | Current status |
 | --- | --- | --- | --- | --- |
 | One project instructions file | Existing [AGENTS.md](../AGENTS.md), linking modular specification, architecture, team, roadmap and permissions | T01, T17 | Start a task from its issue; show the agent reading AGENTS.md and relevant linked context, following scope and using only verified commands. Retain transcript and final diff. | **File verified; complete Extension Pack demonstration not yet verified.** |

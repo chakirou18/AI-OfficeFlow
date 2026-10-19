@@ -2,6 +2,8 @@
 
 Status: proposed working model. No persistent agent team, delegated sessions, or completed agent work is claimed.
 
+T01/T02 governance tasks have documented coding-agent issue/commit evidence; this does not imply a persistent multi-agent coding team. [ADR 0009](adr/0009-coding-agent-extension-pack.md) defines the later specialized-reviewer design. No subagent invocation is authorized by the current architecture task.
+
 ## Two distinct kinds of agents
 
 **Coding agents** help developers design, implement, test, and document this repository. Their access comes from the developer environment and task authorization. They are not deployed product features.

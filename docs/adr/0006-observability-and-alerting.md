@@ -1,0 +1,27 @@
+# ADR 0006 — Correlated local telemetry and bounded alert response
+
+Status: **Accepted for prototype design** for local telemetry and response boundaries. **Proposed / approval required** for external notifications, retention outside the prototype and an actual fault-injection exercise. Owner: T03; implementation: T13–T15.
+
+## Decision and signal paths
+
+Instrument API, worker, graph/model adapter and MCP client/server with OpenTelemetry. A private OTel Collector receives OTLP traces, JSON structured logs and application metrics. Proposed local storage: Tempo for traces, Loki for logs, Prometheus for metrics, Grafana for a single authenticated exploration/dashboard UI. The collector exposes a Prometheus scrape endpoint; traces/logs use the relevant OTLP ingestion paths. Verify exporters, pinned versions and exemplars during implementation, rather than assume configuration compatibility. [OTel log context](https://opentelemetry.io/docs/concepts/signals/logs/) and [Grafana's Tempo integration](https://grafana.com/docs/grafana/latest/datasources/tempo/) support the planned correlation approach; no integration is running yet.
+
+Carry W3C trace context with persisted jobs; record trace_id/span_id on logs emitted inside spans. A processing attempt continues stored context where practical; retries and later approval HTTP requests have explicit links to the originating run trace. Histograms expose trace exemplars/drill-down, not trace IDs as metric labels. Dashboards cover API latency/error ratio, submissions, run outcomes/duration, queue depth/oldest age, approvals and budget usage. Use service/environment/outcome labels; avoid user/request IDs, paths with IDs and unbounded error messages.
+
+Default attributes allow only IDs, counts, durations, schema/graph versions and sanitized error codes. Do not export text/contact fields, prompts, completions, cookies, tool payloads, authorization headers or provider credentials. Use allowlists at instrumentation and collector layers. Synthetic does not justify leaking a credential. Proposed local telemetry retention is seven days with persistent volumes and explicit size limits; this is a design target to implement, not a configured policy or sufficient policy for real data.
+
+## Alert and operational agent path
+
+Prometheus evaluates oldest queued run age >120 seconds continuously for two minutes. Alertmanager groups/deduplicates by environment and alert fingerprint and delivers a credential-protected internal webhook to a separate incident receiver. The receiver validates identity, allowlisted alert type/environment and payload size, upserts an incident and durably queues a responder invocation. Reject arbitrary diagnostic commands in alert labels. A shared credential over the isolated local network is the prototype baseline; public-host transport requires TLS and a separate scoped identity. Never expose the receiver to arbitrary internet requests.
+
+The responder automatically wakes, reads allowlisted redacted metrics/log summaries and proposes only resetting a staging worker-pause flag. A human operator grants an expiring incident/action/environment-bound approval (proposed 10-minute lifetime). The execution service atomically consumes it and allows one action attempt; the agent invokes the reset itself and verifies a synthetic queued request completes within 180 seconds. Duplicates must not repeat the action. Failure, expired approval or ambiguous diagnosis escalates to the operator; no arbitrary shell, restart, deployment, deletion or production mutation.
+
+Persist the environment-scoped pause flag in a restricted `operational_flags` table. It disables new worker claims only, not health/metrics or lease heartbeats for existing work. The recovery identity can clear that one staging key through a narrow service operation; it cannot enable faults, change unrelated flags or write business records. Fault enablement belongs to the later authorized exercise operator, and the flag/action path is disabled in production. This avoids assuming container environment variables can be mutated safely at runtime.
+
+Designing this flow does **not** authorize enabling the fault flag or running the exercise. A06 remains provisional. A later exercise needs explicit environment, timing, flag/reset and operator authorization. Route to an internal incident UI by default; no Slack/email/page is sent without selecting and authorizing a destination.
+
+## Alternatives, costs, security and verification
+
+One hosted observability service reduces maintenance but adds data export, quotas and possible spend; none is selected. Logs-only monitoring is cheaper but does not satisfy trace/metric correlation. A full search stack is heavier than the proposed local Loki/Tempo stores for this scope. A read-only diagnostic agent is safer operationally but does not demonstrate the rubric's actual repair; retain human-approved scoped execution as a later controlled exercise.
+
+Benefits: inspectable local signal storage and reproducible user-impact alerting. Trade-offs: the additional monitoring services add RAM/disk and configuration overhead, so use an optional profile for feature development and a documented full-stack demonstration profile. Shared-host observability is not an independent availability monitor. T13 must demonstrate trace→logs→metric drill-down and redaction; T14/T15 must later record alert delivery, automatic wake-up, approval, action and recovery with actual timings. No telemetry, notification, alert or repair evidence exists yet.

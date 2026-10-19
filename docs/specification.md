@@ -1,6 +1,6 @@
 # Product specification
 
-Status: proposed requirements; none are implemented or verified. Acceptance criteria below define future checks, not passing results.
+Status: prototype requirements and temporary product decisions documented; no application behavior is implemented or verified. Acceptance criteria below define future checks, not passing results. Accepted prototype boundaries do not validate company-specific workflows.
 
 ## Scope and assumptions
 
