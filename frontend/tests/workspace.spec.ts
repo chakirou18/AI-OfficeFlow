@@ -10,6 +10,29 @@ async function signIn(page: import('@playwright/test').Page) {
 
 test.beforeEach(async ({ page }) => { await signIn(page) })
 
+test('analysis is explicitly simulated, persisted and inactive', async ({ page }) => {
+  await page.getByRole('link', { name: 'New request' }).click()
+  await page.getByLabel('Request title').fill('Synthetic browser analysis')
+  await page.getByLabel('Description', { exact: true }).fill('Synthetic checklist; timing is unknown.')
+  await page.getByRole('button', { name: 'Create request', exact: true }).click()
+  await expect(page.getByText('Simulated mode · deterministic offline output')).toBeVisible()
+  const submitted = page.waitForRequest(request => request.method() === 'POST' && request.url().endsWith('/analyses'))
+  await page.getByRole('button', { name: 'Analyze request', exact: true }).click()
+  const headers = (await submitted).headers()
+  expect(headers['idempotency-key']).toBeTruthy()
+  expect(headers['x-csrf-token']).toBeTruthy()
+  await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
+  await expect(page.getByText('Pending human review. Suggestions are inactive; approval is not available yet.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Analyze request', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'No approved tasks yet' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
+  const id = page.url().split('#requests/')[1]
+  const detail = await (await page.request.get(`/api/v1/requests/${id}`)).json()
+  expect(detail.tasks).toEqual([])
+  expect(detail.analysis.provider_mode).toBe('simulated')
+})
+
 test('dashboard shows real PostgreSQL counts and status links', async ({ page }) => {
   const data = await (await page.request.get('/api/v1/dashboard')).json()
   for (const [id, value] of Object.entries({ 'total-requests': data.total_requests, 'approved-tasks': data.total_tasks, 'open-tasks': data.open_tasks, 'completed-tasks': data.completed_tasks })) {
@@ -19,7 +42,8 @@ test('dashboard shows real PostgreSQL counts and status links', async ({ page })
   await expect(page.getByRole('heading', { name: 'Recently updated tasks' })).toBeVisible()
   await page.screenshot({ path: '../artifacts/t08-desktop.png', fullPage: true })
   await page.getByRole('link', { name: 'Awaiting review', exact: false }).click()
-  await expect(page.getByRole('heading', { name: 'No requests match this status.' })).toBeVisible()
+  if (data.requests_by_status.awaiting_review) await expect(page.getByRole('link', { name: 'Synthetic browser analysis', exact: false })).toBeVisible()
+  else await expect(page.getByRole('heading', { name: 'No requests match this status.' })).toBeVisible()
 })
 
 test('create validates input, saves through API, survives refresh and appears in paginated list', async ({ page }) => {

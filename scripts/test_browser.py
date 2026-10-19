@@ -17,6 +17,7 @@ def main():
         config.write_text("POSTGRES_PASSWORD=" + secrets.token_urlsafe(32) + "\n", encoding="utf-8")
     environment = os.environ.copy()
     environment.update(POSTGRES_DB="officeflow_browser_test", FRONTEND_PORT="8081", API_PORT="8001",
+                       MODEL_MODE="simulated",
                        COOKIE_SECURE="false", APP_ORIGINS="http://127.0.0.1:8081")
     command = ["docker", "compose", "-p", "officeflow-browser", "--env-file", str(config)]
     password = secrets.token_urlsafe(32)

@@ -298,3 +298,71 @@ model. Source references: [official MCP SDK](https://github.com/modelcontextprot
 and [Python asyncio timeout](https://docs.python.org/3.12/library/asyncio-task.html#asyncio.timeout).
 Exact results/CI evidence are recorded in Issue #9; T17 still owns the remaining
 Extension Pack demonstrations.
+
+## Local Ollama analysis (T10, real output currently blocked)
+
+The existing installed model is `llama3.2:3b`; startup never downloads it.
+Default `MODEL_MODE=simulated` remains deterministic and is explicitly shown in the
+request detail page. Click **Analyze request** for a pending suggestion set.
+**Retry analysis** explicitly starts a new attempt after a saved failure. Pending
+suggestions are inactive; approval/rejection remains T11.
+
+To opt into the existing local server, set these variables in ignored `.env`, then
+run `docker compose up --build -d --wait`:
+
+```dotenv
+MODEL_MODE=ollama
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+OLLAMA_MAX_CALLS=20
+```
+
+The model name is fixed to the authorized installed model. The endpoint accepts only
+local loopback names or `host.docker.internal`, HTTP port 11434, no credentials,
+path, query, redirects or environment proxies. Do not expose Ollama publicly or
+set a wildcard listener. On this Docker Desktop installation the existing private
+listener was reachable without any binding/firewall change:
+
+```powershell
+docker compose exec -T api python -c "import urllib.request; print(urllib.request.urlopen('http://host.docker.internal:11434/api/version', timeout=5).read().decode())"
+```
+
+If it is unavailable on another machine, keep simulated mode and diagnose local
+connectivity; a public listener is not a prerequisite. Host-run Python can use
+`http://127.0.0.1:11434`. `GET /api/v1/requests/analysis/config` is authenticated and
+returns the configured mode/model; persisted analyses also retain their own mode,
+model and prompt version across later configuration changes.
+
+All attempts retain the existing 30-second deadline, no automatic retry/fallback
+and no task writes. Real calls reserve a persisted lifetime allowance before
+dispatch and allow one nonexpired call across API processes. Exhausted allowance
+or a busy local provider returns sanitized HTTP 429 before dispatch. Failed calls
+consume allowance; replaying the same idempotency key is free. The allowance is a
+total across persisted real attempt history, configurable 1-100, default 20;
+an operator must explicitly raise that total to authorize more attempts. Returning
+to `MODEL_MODE=simulated` and recreating the API disables further real calls.
+
+Tests and browser helpers explicitly use simulated mode. For the separately
+authorized real evaluation, first build the test image and create a dedicated test
+database once (the example uses the default configured database user):
+
+```powershell
+docker compose --profile test build test
+docker compose --profile test up -d --wait test-db
+docker compose exec -T test-db createdb -U officeflow officeflow_ollama_test
+docker compose --profile test run --rm -e POSTGRES_DB=officeflow_ollama_test -e APP_ORIGINS=http://testserver -e COOKIE_SECURE=false -v "${PWD}/artifacts:/evidence" test python -m app.evaluate_ollama --real --output /evidence/t10-real-evaluation.json
+```
+
+Do not rerun `createdb` if that database already exists. The CLI accepts only 1-5
+repository-owned valid synthetic fixture IDs (`--cases simple ambiguous injection`
+by default), refuses a non-`_test` database, creates a private random demo account,
+uses authenticated production analysis routes and verifies persisted output and
+zero task creation. Each call is real, locally bounded and consumes allowance. It
+stops on the first failure, writes the explicit synthetic evaluation artifact and
+returns nonzero; it never labels mocked output as real. Preserve failed evidence
+under a distinct filename before an explicitly authorized rerun.
+
+Current [T10 evidence](t10-verification.md): first real call failed output validation
+after 12.483 seconds; no successful real proposal or timeout is claimed. T10 remains
+open/unmerged pending that runtime gate. No model upgrade/download or provider
+fallback was performed. API reference: [Ollama generate](https://docs.ollama.com/api/generate)
+and [structured outputs](https://docs.ollama.com/capabilities/structured-outputs).

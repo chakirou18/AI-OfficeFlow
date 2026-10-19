@@ -4,13 +4,14 @@ export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) { super(message); this.status = status }
 }
-export async function api<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+export async function api<T>(path: string, method = 'GET', body?: unknown, idempotencyKey?: string): Promise<T> {
   let response: Response
   try {
     response = await fetch(path, {
-      method, credentials: 'same-origin', signal: AbortSignal.timeout(10_000),
+      method, credentials: 'same-origin', signal: AbortSignal.timeout(idempotencyKey ? 40_000 : 10_000),
       headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
-        ...(method === 'GET' ? {} : { 'X-CSRF-Token': csrf }) },
+        ...(method === 'GET' ? {} : { 'X-CSRF-Token': csrf }),
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}) },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     })
   } catch { throw new Error('Unable to connect. Check your connection and retry.') }

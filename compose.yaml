@@ -42,6 +42,9 @@ services:
       APP_ORIGINS: ${APP_ORIGINS:-http://127.0.0.1:8080,http://localhost:8080}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       OPS_TOKEN: ${OPS_TOKEN:-}
+      MODEL_MODE: ${MODEL_MODE:-simulated}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MAX_CALLS: ${OLLAMA_MAX_CALLS:-20}
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -86,6 +89,7 @@ services:
       context: ./backend
       target: test
     environment:
+      MODEL_MODE: simulated
       <<: *database-env
       POSTGRES_HOST: test-db
       POSTGRES_DB: officeflow_test

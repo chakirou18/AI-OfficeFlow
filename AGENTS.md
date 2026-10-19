@@ -4,7 +4,7 @@
 
 This repository is exclusively the DataTalksClub AI Dev Tools Zoomcamp 2026 final project, targeting demonstrable coverage of 12 criteria/24 available points. Build a small generic request/task manager with synthetic data only. There is no pilot company or company-specific workflow. A01-A06 and ADRs 0001-0009 are explicitly superseded; current architecture is ADR 0010.
 
-T04 is merged through PR #19 with verified foundation evidence. T05 adds required backend/frontend CI on pull requests and main; deployment remains T16. The current authorization covers T09 bounded offline analysis and a read-only MCP stdio tool through a verified PR; stop before T10. T08 is merged. Real-model integration is T10 and task creation/human approval remain T11. See docs/development.md for API and MCP commands. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
+T01-T09 are merged; T09 is PR #24. T10 is authorized for local Ollama llama3.2:3b integration and synthetic evaluation through a verified PR; stop before T11. T10 implementation passes local checks but real inference is currently blocked by invalid/incomplete provider output; see docs/t10-verification.md. Do not merge/close T10 as successful until that gate passes. T11 task creation/human approval, T16 deployment and later work remain out of scope. Required Backend checks and Frontend checks remain stable. See docs/development.md for API/MCP/model commands. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
 
 ## Read relevant modular context
 

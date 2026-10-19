@@ -20,6 +20,7 @@ def auth_context(monkeypatch):
         pytest.fail("Tests require an isolated database ending in _test")
     monkeypatch.setenv("APP_ORIGINS", ORIGIN)
     monkeypatch.setenv("COOKIE_SECURE", "false")
+    monkeypatch.setenv("MODEL_MODE", "simulated")
     engine = build_engine()
     password = secrets.token_urlsafe(24)
     handle = "test_" + secrets.token_hex(8)

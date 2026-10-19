@@ -100,6 +100,7 @@ class AnalysisRun(Base):
     idempotency_key: Mapped[UUID] = mapped_column(Uuid)
     state: Mapped[str] = mapped_column(String(8))
     provider_mode: Mapped[str] = mapped_column(String(16), default="simulated")
+    provider_model: Mapped[str | None] = mapped_column(String(64))
     schema_version: Mapped[str] = mapped_column(String(16), default="proposal-v1")
     prompt_version: Mapped[str] = mapped_column(String(16), default="offline-v1")
     proposal: Mapped[dict | None] = mapped_column(JSONB(none_as_null=True))
