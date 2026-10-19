@@ -2,7 +2,7 @@
 
 Scope: small Zoomcamp final project, **synthetic demonstration data only**. No real business, customer records or external company systems. T06 authentication and T07 API controls are implemented as described below; model, MCP, deployment and incident controls remain later requirements. Earlier company assumptions are retired.
 
-Current boundary: local ports bind to 127.0.0.1; PostgreSQL has no published host port; generated configuration is ignored and the frontend has no database secret. Controlled demo accounts, password hashing, revocable sessions, expiry/lockout and CSRF/Origin protection guard app access. Diagnostics require a separate bearer credential and the frontend proxy excludes `/api/v1/ops`; no operational mutation exists. Public exposure still requires T16 HTTPS/deployment controls. See [the local guide](development.md).
+Current boundary: local ports bind to 127.0.0.1; PostgreSQL has no published host port; generated configuration is ignored and the frontend has no database secret. Controlled demo accounts, password hashing, revocable sessions, expiry/lockout and CSRF/Origin protection guard app access. The frontend proxy excludes `/api/v1/ops`. Read-only diagnostics, exercise authorization and bounded on-call reset use three distinct scoped credentials. T15's [exercise gate](oncall-agent.md) is disabled by default and live execution requires explicit human approval. Public exposure still requires T16 HTTPS/deployment controls. See [the local guide](development.md).
 
 ## Secrets and identities
 

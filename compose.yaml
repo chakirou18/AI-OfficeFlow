@@ -50,6 +50,10 @@ services:
       DEV_ANALYSIS_FAILURE_REQUEST_ID: ${DEV_ANALYSIS_FAILURE_REQUEST_ID:-}
       ENABLE_DEV_FAULTS: ${ENABLE_DEV_FAULTS:-false}
       APP_ENV: development
+      ENABLE_ONCALL_EXERCISE: ${ENABLE_ONCALL_EXERCISE:-false}
+      EXERCISE_ADMIN_TOKEN_FILE: /run/secrets/exercise_admin_token
+      ONCALL_OPS_TOKEN_FILE: /run/secrets/oncall_ops_token
+    secrets: [exercise_admin_token, oncall_ops_token]
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -135,10 +139,11 @@ services:
     command: ["uvicorn", "app.oncall:create_listener", "--factory", "--host", "0.0.0.0", "--port", "8010", "--no-access-log"]
     environment:
       ALERT_TOKEN_FILE: /run/secrets/alert_webhook_token
-    secrets: [alert_webhook_token]
+      ONCALL_OPS_TOKEN_FILE: /run/secrets/oncall_ops_token
+    secrets: [alert_webhook_token, oncall_ops_token]
     volumes:
       - oncall_data:/data
-    # No host ports, app proxy route, model, ops token, or database credentials.
+    # No host ports, app proxy, model, maintainer credential or database credentials.
 
   loki:
     image: grafana/loki:3.4.2
@@ -186,6 +191,10 @@ volumes:
   grafana_data:
 
 secrets:
+  exercise_admin_token:
+    file: ./artifacts/exercise-admin-token
+  oncall_ops_token:
+    file: ./artifacts/oncall-ops-token
   alert_webhook_token:
     file: ./artifacts/alert-webhook-token
   grafana_admin_password:

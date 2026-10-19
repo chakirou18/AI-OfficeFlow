@@ -31,7 +31,7 @@ from pathlib import Path
 p=json.load(sys.stdin)
 headers={}
 if p['auth']: headers['Authorization']='Bearer '+Path('/run/secrets/alert_webhook_token').read_text().strip()
-url=('http://127.0.0.1:8010' if p['path'].startswith(('/receipts','/webhook')) else 'http://alertmanager:9093')+p['path']
+url=('http://127.0.0.1:8010' if p['path'].startswith(('/receipts','/webhook','/agent-runs')) else 'http://alertmanager:9093')+p['path']
 data=json.dumps(p['body']).encode() if p['body'] is not None else None
 if data is not None: headers['Content-Type']='application/json'
 try: r=urllib.request.urlopen(urllib.request.Request(url,data=data,headers=headers),timeout=5)
