@@ -3,7 +3,7 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Uuid, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -38,3 +38,44 @@ class LoginSession(Base):
     token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("demo_users.id", ondelete="CASCADE"), index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class CustomerRequest(Base):
+    __tablename__ = "requests"
+    __table_args__ = (
+        CheckConstraint("length(btrim(title)) BETWEEN 1 AND 200", name="request_title_length"),
+        CheckConstraint("length(btrim(description)) BETWEEN 1 AND 5000", name="request_description_length"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    creator_id: Mapped[UUID] = mapped_column(ForeignKey("demo_users.id"))
+    creator_handle: Mapped[str] = mapped_column(String(40))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Task(Base):
+    """Approved-task storage. API creation is exclusively future T11 approval."""
+    __tablename__ = "tasks"
+    __table_args__ = (
+        UniqueConstraint("analysis_id", "suggestion_index", name="unique_approved_suggestion"),
+        CheckConstraint("state IN ('open', 'done')", name="task_state"),
+        CheckConstraint("priority IN ('low', 'medium', 'high')", name="task_priority"),
+        CheckConstraint("suggestion_index BETWEEN 0 AND 4", name="task_suggestion_index"),
+        CheckConstraint("length(btrim(title)) BETWEEN 1 AND 200", name="task_title_length"),
+        CheckConstraint("length(btrim(rationale)) BETWEEN 1 AND 1000", name="task_rationale_length"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    request_id: Mapped[UUID] = mapped_column(ForeignKey("requests.id", ondelete="CASCADE"), index=True)
+    # Reserved source identity: FK will be added when analysis_runs exists in T09/T11.
+    analysis_id: Mapped[UUID] = mapped_column(Uuid)
+    suggestion_index: Mapped[int] = mapped_column(Integer)
+    title: Mapped[str] = mapped_column(String(200))
+    rationale: Mapped[str] = mapped_column(String(1000))
+    priority: Mapped[str] = mapped_column(String(6))
+    state: Mapped[str] = mapped_column(String(4), default="open", server_default="open")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

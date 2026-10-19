@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T04 foundation implemented and locally verified on its feature branch, awaiting PR review.** React, FastAPI and PostgreSQL communicate through a fixed synthetic connectivity check. Alembic migration, five backend tests, two browser tests and container-restart persistence were verified. Request/task workflows, authentication, AI, CI/CD, telemetry and deployment remain future tasks; no full-project completion or points are claimed.
+**Status: authenticated foundation and request/task API implemented.** T04-T06 are merged; T07 adds immutable requests and stored task-state updates. Required CI verifies 10 unit and 39 PostgreSQL integration tests plus lint and the typechecked frontend build. Three authenticated browser checks and real container-restart persistence are verified. Request-management UI, AI/approval workflows, deployment and telemetry remain later tasks; no full-project completion or grading points are claimed.
 
 ## Run the foundation locally
 
@@ -18,14 +18,14 @@ Then start the complete T04 foundation with one command:
 docker compose up --build
 ```
 
-Open [http://127.0.0.1:8080](http://127.0.0.1:8080) and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL is private. Authentication is T06, so this is a local review foundation rather than a public demo.
+Create a controlled account using the command below, open [http://127.0.0.1:8080](http://127.0.0.1:8080), sign in, and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL and operations routes are excluded from the frontend proxy. Public HTTPS deployment remains T16.
 
 ```powershell
 docker compose --profile test run --build --rm test
 python scripts/verify_persistence.py
 ```
 
-Actual results: **5 backend tests passed** against isolated PostgreSQL; **2 browser checks passed** in installed Edge; the same database row survived db/API restart. Clean tracked-source startup was also exercised in a separate Compose project. See [verified instructions](docs/development.md) and the [T04 evidence/failures record](docs/t04-verification.md) for exact scope, warnings, optional browser commands and stopping/resuming without deleting data.
+Current results: **49 backend tests passed** against isolated PostgreSQL in T07 CI; **3 authenticated browser checks passed** in installed Edge during T06. Synthetic foundation/request rows and sessions survived db/API restarts. Historical clean tracked-source startup is recorded in [T04 evidence](docs/t04-verification.md); see [development instructions](docs/development.md) for current setup, commands and boundaries.
 
 ## Problem and expected behavior
 
@@ -88,3 +88,7 @@ Controlled demo login is now required for the foundation write/read flow. Create
 from a trusted terminal with `docker compose exec api python -m app.manage_users create demo_user`.
 See [authentication setup and boundaries](docs/development.md#controlled-demo-authentication-t06).
 No default password or public signup is provided.
+
+The authenticated [request/task API](docs/development.md#request-and-task-api-t07)
+now supports immutable request creation, pagination/detail and persisted task open/done
+updates. Request-management UI, analysis and human approval remain later tasks.
