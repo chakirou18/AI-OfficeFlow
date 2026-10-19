@@ -5,20 +5,34 @@ from pathlib import Path
 import subprocess
 import time
 from urllib.error import URLError
-from urllib.request import Request, urlopen
+from urllib.request import Request
+from urllib.request import build_opener, HTTPCookieProcessor
+from http.cookiejar import CookieJar
+from getpass import getpass
 import os
 
 
 ROOT = Path(__file__).resolve().parents[1]
+OPENER = build_opener(HTTPCookieProcessor(CookieJar()))
+HEADERS = {}
 
 
 def read_json(url: str, method: str = "GET") -> dict:
-    with urlopen(Request(url, method=method), timeout=5) as response:
+    with OPENER.open(Request(url, method=method, headers=HEADERS), timeout=5) as response:
         return json.load(response)
 
 
 def main() -> None:
     base = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8080").rstrip("/")
+    credentials = {
+        "handle": os.environ.get("DEMO_HANDLE") or input("Demo handle: "),
+        "password": os.environ.get("DEMO_PASSWORD") or getpass("Demo password: "),
+    }
+    request = Request(f"{base}/api/v1/auth/login", data=json.dumps(credentials).encode(),
+                      headers={"Content-Type": "application/json", "Origin": base})
+    with OPENER.open(request, timeout=5) as response:
+        identity = json.load(response)
+    HEADERS.update({"Origin": base, "X-CSRF-Token": identity["csrf_token"]})
     created = read_json(f"{base}/api/v1/foundation/checks", "POST")
     endpoint = f"{base}/api/v1/foundation/checks/{created['id']}"
     assert read_json(endpoint) == created, "Initial database read does not match"

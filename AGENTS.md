@@ -4,7 +4,7 @@
 
 This repository is exclusively the DataTalksClub AI Dev Tools Zoomcamp 2026 final project, targeting demonstrable coverage of 12 criteria/24 available points. Build a small generic request/task manager with synthetic data only. There is no pilot company or company-specific workflow. A01-A06 and ADRs 0001-0009 are explicitly superseded; current architecture is ADR 0010.
 
-T04 is merged through PR #19 with verified foundation evidence. T05 adds required backend/frontend CI on pull requests and main; deployment remains T16. The current authorization ends at T05. Request/task management, authentication, AI and operational services remain later tasks. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
+T04 is merged through PR #19 with verified foundation evidence. T05 adds required backend/frontend CI on pull requests and main; deployment remains T16. The current authorization covers T06 authentication followed by T07 request/task persistence, each through its own verified PR. T08+ remains outside this task. Authentication uses controlled demo accounts and database-backed sessions; see docs/development.md for setup. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
 
 ## Read relevant modular context
 

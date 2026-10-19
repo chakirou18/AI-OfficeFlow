@@ -83,3 +83,8 @@ CI runs backend lint/unit/PostgreSQL integration tests and frontend lint/typeche
 builds on pull requests and main. Both jobs are required for merging. See
 [CI workflow](.github/workflows/ci.yml) and [CI commands](docs/development.md#continuous-integration-t05).
 Deployment automation remains T16.
+
+Controlled demo login is now required for the foundation write/read flow. Create accounts
+from a trusted terminal with `docker compose exec api python -m app.manage_users create demo_user`.
+See [authentication setup and boundaries](docs/development.md#controlled-demo-authentication-t06).
+No default password or public signup is provided.
