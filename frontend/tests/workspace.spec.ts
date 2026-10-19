@@ -37,6 +37,12 @@ test('human approval saves only the selected analysis once and refreshes dashboa
   await expect(page.getByRole('button', { name: 'Approve suggestions', exact: true })).toHaveCount(0)
   await page.reload()
   await expect(page.getByText('Saved attempt: Simulated · approved')).toBeVisible()
+  const persisted = await (await page.request.get(`/api/v1/requests/${detail.id}`)).json()
+  expect(persisted.tasks.map((task: { id: string }) => task.id)).toEqual(saved.tasks.map((task: { id: string }) => task.id))
+  for (const task of saved.tasks) {
+    expect(persisted.tasks.find((row: { id: string }) => row.id === task.id)).toMatchObject({ title: task.title, priority: task.priority, rationale: task.rationale, state: 'open' })
+    await expect(page.getByRole('button', { name: `Mark done: ${task.title}`, exact: true })).toBeVisible()
+  }
   const me = await (await page.request.get('/api/v1/auth/me')).json()
   const headers = { Origin: new URL(page.url()).origin, 'X-CSRF-Token': me.csrf_token }
   const endpoint = `/api/v1/requests/${detail.id}/analyses/${detail.analysis.id}/decision`

@@ -32,3 +32,29 @@ def test_offline_fixtures_are_deterministic_and_untrusted_text_is_only_data(fixt
 def test_invalid_model_output_is_rejected(payload):
     with pytest.raises(ValidationError):
         Proposal.model_validate(payload)
+
+
+def test_schema_accepts_five_suggestions_exact_text_limits_and_all_priorities():
+    result = Proposal.model_validate({"summary": "s" * 1000, "tasks": [
+        {"title": "t" * 200, "priority": priority, "rationale": "r" * 1000}
+        for priority in ("low", "medium", "high", "low", "medium")]})
+    assert len(result.tasks) == 5
+    assert {task.priority for task in result.tasks} == {"low", "medium", "high"}
+
+
+@pytest.mark.parametrize("case", ["six_tasks", "long_summary", "long_title", "long_rationale", "blank_rationale", "numeric_title"])
+def test_schema_rejects_excessive_or_non_text_model_output(case):
+    payload = {"summary": "Synthetic summary", "tasks": [
+        {"title": "Synthetic task", "priority": "low", "rationale": "Synthetic rationale"}]}
+    if case == "six_tasks":
+        payload["tasks"] *= 6
+    elif case == "long_summary":
+        payload["summary"] = "s" * 1001
+    else:
+        field, value = {"long_title": ("title", "t" * 201),
+                        "long_rationale": ("rationale", "r" * 1001),
+                        "blank_rationale": ("rationale", " \t "),
+                        "numeric_title": ("title", 123)}[case]
+        payload["tasks"][0][field] = value
+    with pytest.raises(ValidationError):
+        Proposal.model_validate(payload)
