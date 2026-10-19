@@ -304,8 +304,8 @@ Extension Pack demonstrations.
 The existing installed model is `llama3.2:3b`; startup never downloads it.
 Default `MODEL_MODE=simulated` remains deterministic and is explicitly shown in the
 request detail page. Click **Analyze request** for a pending suggestion set.
-**Retry analysis** explicitly starts a new attempt after a saved failure. Pending
-suggestions are inactive; approval/rejection remains T11.
+**Retry analysis** explicitly starts a new attempt after failure or rejection. Pending
+suggestions remain inactive until the explicit human decision described below.
 
 To opt into the existing local server, set these variables in ignored `.env`, then
 run `docker compose up --build -d --wait`:
@@ -367,3 +367,41 @@ and persisted pending within 30 seconds, with zero active tasks created. The ini
 failed evaluation is retained as historical evidence. No model upgrade/download or provider
 fallback was performed. API reference: [Ollama generate](https://docs.ollama.com/api/generate)
 and [structured outputs](https://docs.ollama.com/capabilities/structured-outputs).
+
+## Human approval and rejection (T11)
+
+Request details show the complete saved proposal, mode and analysis ID. **Approve
+suggestions** creates the complete task set; **Reject suggestions** requires a reason
+of 1-1000 trimmed characters and creates no tasks. The UI shows the persisted
+decision and reason as escaped text, removes decision controls after success and
+refreshes PostgreSQL-backed request/dashboard state. Rejected requests can be
+explicitly analyzed again. Old decisions remain in authenticated analysis history.
+
+`POST /api/v1/requests/{request_id}/analyses/{analysis_id}/decision` requires a demo
+session, exact allowed Origin and CSRF token. Body: `{"decision":"approve"}` or
+`{"decision":"reject","reason":"Synthetic scope unclear"}`. Extra fields, replacement
+tasks, forged identity, approval reasons and missing/blank/oversized rejection reasons
+are rejected. Model and ops identities have no demo-session approval authority.
+
+The transaction locks request then the specific analysis, validates the saved
+proposal again for approval, creates tasks using its persisted title/priority/rationale,
+records authenticated `decided_by`/`decided_at`/rejection reason and updates request
+activity time. Status derives from the same committed task/analysis state. It returns
+200 with analysis, source task rows and current request status. Repeating the same
+decision returns the existing result with original decision metadata; changing the
+choice or saved rejection reason returns 409. Wrong request/analysis pair returns
+404; running/failed attempts cannot be decided (409). A database failure rolls back
+all decision/task changes. No model call occurs in this operation.
+
+Migration `0006_human_decisions` adds nullable decision metadata, an approver FK
+and checks requiring a decision identity/time and bounded rejection reason in final
+states. Existing unique `(analysis_id,suggestion_index)` task identity plus request/
+analysis locks prevent duplicate concurrent approval. Historical direct synthetic
+task fixtures retain their reserved source UUIDs; they are not human-approval evidence.
+No task-analysis FK/backfill or history rewriting is introduced by this slice.
+
+Verification: the existing aggregate backend command passed **131 tests**, including
+real PostgreSQL concurrency and rollback checks. The isolated Edge helper passed
+**15 browser tests**, including approve/reject/replay/retry and dashboard counts.
+Frontend lint, TypeScript/Vite build and Ruff 0.14.0 passed. Exact PR CI/merge evidence
+is recorded on [Issue #11](https://github.com/chakirou18/AI-OfficeFlow/issues/11).

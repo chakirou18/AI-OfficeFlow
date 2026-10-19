@@ -17,6 +17,7 @@ from app.models import FoundationCheck
 from app.auth import current_user, require_mutation, router as auth_router
 from app.requests import router as requests_router
 from app.analysis import router as analysis_router
+from app.decisions import router as decisions_router
 from app.model_adapter import configured_adapter
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ def create_app(engine: Engine | None = None) -> FastAPI:
     application.include_router(auth_router)
     application.include_router(requests_router)
     application.include_router(analysis_router)
+    application.include_router(decisions_router)
 
     @application.middleware("http")
     async def security_headers(request: Request, call_next):

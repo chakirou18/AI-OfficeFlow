@@ -58,7 +58,7 @@ class CustomerRequest(Base):
 
 
 class Task(Base):
-    """Approved-task storage. API creation is exclusively future T11 approval."""
+    """Approved-task storage; application writes require a human decision."""
     __tablename__ = "tasks"
     __table_args__ = (
         UniqueConstraint("analysis_id", "suggestion_index", name="unique_approved_suggestion"),
@@ -71,7 +71,7 @@ class Task(Base):
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
     request_id: Mapped[UUID] = mapped_column(ForeignKey("requests.id", ondelete="CASCADE"), index=True)
-    # Reserved source identity: FK will be added when analysis_runs exists in T09/T11.
+    # Historical synthetic fixtures retain reserved UUIDs; approval uses its run ID.
     analysis_id: Mapped[UUID] = mapped_column(Uuid)
     suggestion_index: Mapped[int] = mapped_column(Integer)
     title: Mapped[str] = mapped_column(String(200))
@@ -92,6 +92,11 @@ class AnalysisRun(Base):
         CheckConstraint("deadline_at > started_at AND deadline_at <= started_at + interval '30 seconds'", name="analysis_deadline"),
         CheckConstraint("state NOT IN ('pending', 'approved', 'rejected') OR proposal IS NOT NULL", name="analysis_proposal"),
         CheckConstraint("state <> 'failed' OR error_code IS NOT NULL", name="analysis_failure"),
+        CheckConstraint("(state IN ('approved', 'rejected') AND decided_by IS NOT NULL AND decided_at IS NOT NULL) OR "
+                        "(state NOT IN ('approved', 'rejected') AND decided_by IS NULL AND decided_at IS NULL AND rejection_reason IS NULL)",
+                        name="analysis_decision_identity"),
+        CheckConstraint("(state = 'rejected' AND rejection_reason IS NOT NULL AND length(btrim(rejection_reason)) BETWEEN 1 AND 1000) OR "
+                        "(state <> 'rejected' AND rejection_reason IS NULL)", name="analysis_rejection_reason"),
     )
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
@@ -108,3 +113,6 @@ class AnalysisRun(Base):
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     deadline_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    decided_by: Mapped[UUID | None] = mapped_column(ForeignKey("demo_users.id"))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    rejection_reason: Mapped[str | None] = mapped_column(String(1000))

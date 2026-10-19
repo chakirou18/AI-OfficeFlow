@@ -27,7 +27,7 @@ def test_readiness_checks_real_postgres_and_migrated_table(engine, auth_context)
     client = auth_context[0]
     response = client.get("/api/v1/health/ready")
     assert response.status_code == 200
-    assert response.json()["migration"] == "0005_model_metadata"
+    assert response.json()["migration"] == "0006_human_decisions"
     with engine.connect() as connection:
         assert connection.execute(text("SELECT current_database()")).scalar_one().endswith("_test")
 
