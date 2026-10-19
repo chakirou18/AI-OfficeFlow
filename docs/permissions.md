@@ -2,6 +2,8 @@
 
 Scope: small Zoomcamp final project, **synthetic demonstration data only**. No real business, customer records or external company systems. Controls below are requirements/design, not implemented safeguards. Earlier company assumptions are retired.
 
+T04 implementation boundary: local ports bind to 127.0.0.1, PostgreSQL has no published host port, configuration is generated/ignored and the frontend has no database secret. The foundation exposes only fixed synthetic connectivity checks. Account/session/CSRF, scoped ops/MCP and operational guardrails below are later tasks, not present safeguards. Do not expose this pre-authentication foundation publicly. See [the verified local guide](development.md).
+
 ## Secrets and identities
 
 Keep model/deployment/operational credentials, demo passwords and session secrets in untracked local configuration or approved secret management. Root .gitignore exists; a placeholder-only example environment file is planned. Never put secrets in Git, frontend bundles, images, prompts, issues, screenshots, logs or traces. Use pseudonymous demo accounts and synthetic request text. A public repository does not make credentials public demo data.

@@ -4,7 +4,7 @@
 
 This repository is exclusively the DataTalksClub AI Dev Tools Zoomcamp 2026 final project, targeting demonstrable coverage of 12 criteria/24 available points. Build a small generic request/task manager with synthetic data only. There is no pilot company or company-specific workflow. A01-A06 and ADRs 0001-0009 are explicitly superseded; current architecture is ADR 0010.
 
-No application, dependency setup, passing application tests or deployment exists yet. This task authorizes documentation/tracker updates and commit/push, not application code, installation, paid services, live model calls or operational exercises. Keep claims tied to actual evidence. Preserve valid user changes, all existing T01-T18 issue IDs, useful historical ADRs and Git history. Never force push or rewrite history.
+T04 now has a local React/FastAPI/PostgreSQL foundation, locked dependencies, Alembic migration, health/connectivity checks and passing foundation tests on `feat/t04-full-stack-foundation`, awaiting review. See the T04 verification record. Request/task management, authentication, AI, CI and operational services are not implemented. The user authorized T04 implementation/testing and a feature-branch PR; do not implement T05+ or merge/close T04 before review. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
 
 ## Read relevant modular context
 
@@ -17,6 +17,7 @@ No application, dependency setup, passing application tests or deployment exists
 - [Grading checklist](docs/grading-checklist.md): exact 12-criterion evidence map.
 - [Module 5 checklist](docs/module5-checklist.md): seven items and custom-agent branch.
 - [ADR index](docs/adr/README.md): current versus superseded rationale.
+- [Local development guide](docs/development.md) and [T04 verification](docs/t04-verification.md): actual foundation commands/results, clean-source test and limitations.
 
 ## Issue-first workflow
 
@@ -30,21 +31,25 @@ Use React/TypeScript/Vite; Python/FastAPI/Pydantic; PostgreSQL/SQLAlchemy/Alembi
 
 A model result is an inactive proposal. Only a human approval transaction creates active tasks. Validate schema/priority/text sizes, escape UI text, use database constraints for duplicate/concurrent approval and keep model I/O outside transactions. Default local/tests to visibly simulated deterministic model mode; T10 requires separate authorized real-model evidence. Tests use real isolated PostgreSQL where persistence/concurrency matters. Implement meaningful tests with each feature; do not defer all testing to T12.
 
-Proposed directories: `frontend/`, `backend/`, `tests/`, `infra/`, `tools/` for a small read-only MCP tool and `custom-agent/` for on-call; later `agent-capabilities/` and `agent-hooks/` support Module 5. These executable directories do not exist yet. Actual package/configuration paths and pinned versions are verified during implementation, not fabricated now.
+Implemented directories: `frontend/`, `backend/` (including Alembic and unit/integration tests), and root `scripts/` for safe local setup/restart verification. Root `compose.yaml` starts the foundation and isolates test PostgreSQL. `infra/`, `tools/`, `custom-agent/`, `agent-capabilities/` and `agent-hooks/` remain future scope. Backend hash locks and npm package lock are committed; secrets, node_modules and local artifacts remain ignored.
 
-## Planned commands — none implemented
+## Verified foundation commands and planned later checks
 
 | Purpose | Proposed command | Status |
 | --- | --- | --- |
-| Complete demo startup | `docker compose up --build` | Planned; core scaffold first, full telemetry/alert/listener services added before final acceptance |
-| Stop without deleting data | `docker compose down` | Planned; never implicitly add volume deletion |
-| Unit and integration suites together | `docker compose --profile test run --build --rm test` | Planned; isolated PostgreSQL dependencies, migrations and aggregate exit status required |
-| Backend focused tests | `python -m pytest backend/tests` | Planned; paths/environment absent |
+| One-time local configuration | `python scripts/configure_local.py` | Verified; ignored generated password, existing file preserved |
+| T04 foundation startup | `docker compose up --build` | Verified for db/migrate/api/frontend; final telemetry/alert/listener services remain later work |
+| Detached startup / stop | `docker compose up -d --wait` / `docker compose down` | Verified; down preserves the volume, never implicitly add volume deletion |
+| Unit and integration suites together | `docker compose --profile test run --build --rm test` | Verified: 5 foundation tests, isolated real PostgreSQL, migration and aggregate status; not complete T12 coverage |
+| Restart persistence | `python scripts/verify_persistence.py` | Verified; restarts db/api only and compares the persisted synthetic row |
+| Schema readiness | `docker compose exec -T api alembic current` / `docker compose exec -T api alembic check` | Verified head 0001_foundation, no schema drift |
 | Python lint/types | `ruff check backend custom-agent tools tests` / `mypy backend` | Planned; configuration/tools absent |
-| Frontend dev/build | `npm --prefix frontend run dev` / `npm --prefix frontend run build` | Planned; scripts absent |
-| Frontend checks/smoke | `npm --prefix frontend run lint` / `npm --prefix frontend run typecheck` / `npm --prefix frontend run test:e2e` | Planned; scripts/tests absent |
+| Frontend production build | `npm.cmd --prefix frontend run build` | Verified: typecheck and Vite build; npm without .cmd works on non-Windows shells |
+| Frontend browser smoke | `$env:BROWSER_CHANNEL='msedge'` then `npm.cmd --prefix frontend run test:e2e` | Verified: 2 tests using installed Edge; see guide for browser prerequisite |
+| Frontend development server | `npm --prefix frontend run dev` | Implemented script, not exercised during T04; built Compose frontend was tested |
+| Frontend lint | `npm --prefix frontend run lint` | Planned; no lint script exists yet |
 
-Do not run planned commands as though they work. Update commands/status only after implementation and actual checks.
+Do not run planned commands as though they work. Default supported tests run in containers; a bare host pytest command needs its own dependency/database setup and is not advertised as verified. Update command status only after actual checks. No CI workflow has been created for T05.
 
 ## Security and final evidence
 

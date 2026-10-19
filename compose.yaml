@@ -1,0 +1,94 @@
+name: officeflow
+
+x-database-env: &database-env
+  POSTGRES_USER: ${POSTGRES_USER:-officeflow}
+  POSTGRES_DB: ${POSTGRES_DB:-officeflow}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run python scripts/configure_local.py first}
+
+x-api-build: &api-build
+  context: ./backend
+  target: runtime
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment: *database-env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    # Private Compose network only; no host database port.
+
+  migrate:
+    image: officeflow-api:local
+    build: *api-build
+    environment:
+      <<: *database-env
+      POSTGRES_HOST: db
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    image: officeflow-api:local
+    build: *api-build
+    environment:
+      <<: *database-env
+      POSTGRES_HOST: db
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=4)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  test-db:
+    image: postgres:17-alpine
+    profiles: ["test"]
+    environment:
+      <<: *database-env
+      POSTGRES_DB: officeflow_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  test:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      target: test
+    environment:
+      <<: *database-env
+      POSTGRES_HOST: test-db
+      POSTGRES_DB: officeflow_test
+    depends_on:
+      test-db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
