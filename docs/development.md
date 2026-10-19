@@ -1,6 +1,6 @@
 # Local development guide
 
-Scope: the React/FastAPI/PostgreSQL application through T11 and T12 test consolidation. Deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See [test coverage and commands](testing.md) and the sections below for account setup and API contracts; historical T04-only evidence remains separate.
+Scope: application through T12 and T13 local observability. Alerting, deployment and incident features remain later tasks. Keep Compose local. See [observability setup](observability.md), [test commands](testing.md) and the API sections below; historical T04-only evidence remains separate.
 
 ## Prerequisites and configuration
 
@@ -10,6 +10,7 @@ From the repository root, perform this one-time setup:
 
 ```powershell
 python scripts/configure_local.py
+python scripts/configure_observability.py
 ```
 
 It creates an ignored `.env` with a generated local database password and default loopback ports. It does not print the password or overwrite an existing file. [.env.example](../.env.example) documents the names with a placeholder, not usable credentials. The API rejects that placeholder. Do not commit `.env`. Public deployment requires the separate T16 HTTPS/configuration work.

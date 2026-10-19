@@ -45,6 +45,8 @@ services:
       MODEL_MODE: ${MODEL_MODE:-simulated}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MAX_CALLS: ${OLLAMA_MAX_CALLS:-20}
+      TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -90,6 +92,7 @@ services:
       target: test
     environment:
       MODEL_MODE: simulated
+      TELEMETRY_ENABLED: "false"
       <<: *database-env
       POSTGRES_HOST: test-db
       POSTGRES_DB: officeflow_test
@@ -97,5 +100,64 @@ services:
       test-db:
         condition: service_healthy
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.123.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./infra/observability/collector.yaml:/etc/otelcol/config.yaml:ro
+    depends_on: [loki, tempo]
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=7d", "--enable-feature=exemplar-storage"]
+    volumes:
+      - ./infra/observability/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on: [otel-collector]
+
+  loki:
+    image: grafana/loki:3.4.2
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./infra/observability/loki.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    volumes:
+      - ./infra/observability/tempo.yaml:/etc/tempo/config.yaml:ro
+      - tempo_data:/var/tempo
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    environment:
+      GF_SECURITY_ADMIN_USER: monitor
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/officeflow.json
+    secrets: [grafana_admin_password]
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./infra/observability/grafana/provisioning/datasources.yaml:/etc/grafana/provisioning/datasources/sources.yaml:ro
+      - ./infra/observability/grafana/provisioning/dashboards.yaml:/etc/grafana/provisioning/dashboards/providers.yaml:ro
+      - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on: [prometheus, loki, tempo]
+
 volumes:
   postgres_data:
+  prometheus_data:
+  loki_data:
+  tempo_data:
+  grafana_data:
+
+secrets:
+  grafana_admin_password:
+    file: ./artifacts/grafana-admin-password

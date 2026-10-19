@@ -1,5 +1,6 @@
 """One bounded, synchronous HTTP analysis journey; no queue or task-write path."""
 import asyncio
+import time
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
@@ -12,6 +13,8 @@ from sqlalchemy.orm import Session
 from app.auth import current_user, require_mutation
 from app.model_adapter import InvalidModelOutput, ModelAdapter, Proposal
 from app.models import AnalysisRun, CustomerRequest, DemoUser, Task
+from app.telemetry import CURRENT, operation_span
+from opentelemetry.trace import SpanKind
 
 DEADLINE_SECONDS = 30
 
@@ -110,21 +113,28 @@ async def execute_analysis(engine: Engine, adapter: ModelAdapter, request_id: UU
     if content is None:
         return run
     proposal, error = None, None
+    started = time.monotonic()
     try:
         # No database session/transaction is held across the cancellable model call.
         remaining = max(0, (run.deadline_at - now()).total_seconds())
         async with asyncio.timeout(remaining):
-            proposal = Proposal.model_validate(await adapter.analyze(*content))
+            with operation_span("model.analyze", kind=SpanKind.CLIENT):
+                proposal = Proposal.model_validate(await adapter.analyze(*content))
     except TimeoutError:
         error = "timeout"
     except (ValidationError, InvalidModelOutput):
         error = "invalid_output"
     except asyncio.CancelledError:
         finish_attempt(engine, run, None, "interrupted")
+        if observer := CURRENT.get():
+            observer.analysis("failed", "interrupted", run.provider_mode, time.monotonic() - started)
         raise
     except Exception:
         error = "provider_error"  # Never persist/log provider text, prompts or credentials.
-    return finish_attempt(engine, run, proposal, error)
+    result = finish_attempt(engine, run, proposal, error)
+    if observer := CURRENT.get():
+        observer.analysis(result.state, result.error_code, result.provider_mode, time.monotonic() - started)
+    return result
 
 
 router = APIRouter(prefix="/api/v1/requests", dependencies=[Depends(current_user)])

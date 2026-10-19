@@ -6,6 +6,7 @@ from typing import Literal, Protocol
 from urllib.parse import urlsplit
 
 import httpx
+from app.telemetry import trace_headers
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -85,7 +86,7 @@ class OllamaAdapter:
             async with asyncio.timeout(30):
                 async with httpx.AsyncClient(transport=self.transport, trust_env=False,
                                             follow_redirects=False, timeout=30) as client:
-                    async with client.stream("POST", self.base_url + "/api/generate", json=body) as response:
+                    async with client.stream("POST", self.base_url + "/api/generate", json=body, headers=trace_headers()) as response:
                         response.raise_for_status()
                         raw = bytearray()
                         async for chunk in response.aiter_bytes():
