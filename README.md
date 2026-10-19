@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T01-T10 merged; T11 human decisions implemented and locally verified.** The authenticated workspace supports requests, bounded analysis, explicit human approval/rejection, persisted tasks and dashboard counts. Local checks pass: 131 backend and 15 browser tests. See [T10 real CPU inference evidence](docs/t10-verification.md), [decision API](docs/development.md#human-approval-and-rejection-t11) and Issue #11 for required CI/merge evidence. Deployment, telemetry and later tasks remain unfinished; no grading points are claimed.
+**Status: T01-T11 merged; T12 coverage verified locally.** The authenticated workspace supports requests, bounded analysis, explicit human approval/rejection, persisted tasks and dashboard counts. Local checks pass: 145 backend and 15 browser tests. See [test coverage and commands](docs/testing.md), [T10 real CPU inference evidence](docs/t10-verification.md) and Issue #12 for required CI/merge evidence. Deployment, telemetry and later tasks remain unfinished; no grading points are claimed.
 
 ## Run the foundation locally
 
@@ -25,7 +25,7 @@ docker compose --profile test run --build --rm test
 python scripts/verify_persistence.py
 ```
 
-Current local results: **131 backend tests passed** against isolated PostgreSQL and **15 browser checks passed** in installed Edge. Synthetic foundation/request rows and sessions survived earlier db/API restart checks. Historical clean tracked-source startup is recorded in [T04 evidence](docs/t04-verification.md); see [development instructions](docs/development.md) and Issue #11 for current commands and CI evidence.
+Current local results: **145 backend tests passed** against isolated PostgreSQL and **15 browser checks passed** in installed Edge. Synthetic foundation/request rows and sessions survived earlier db/API restart checks. Historical clean tracked-source startup is recorded in [T04 evidence](docs/t04-verification.md); see [testing instructions](docs/testing.md) and Issue #12 for current commands and CI evidence.
 
 ## Problem and expected behavior
 

@@ -12,9 +12,9 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.analysis import DEADLINE_SECONDS, execute_analysis, now
+from app.analysis import DEADLINE_SECONDS, begin_attempt, execute_analysis, finish_attempt, now
 from app.api import create_app
-from app.model_adapter import OfflineAdapter
+from app.model_adapter import OfflineAdapter, Proposal
 from app.models import AnalysisRun, Task
 
 pytestmark = pytest.mark.integration
@@ -143,6 +143,31 @@ def test_cancellation_persists_interruption(auth_context):
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(execute_analysis(engine, CancelledAdapter(), request, user_id, uuid4()))
     assert client.get(f"/api/v1/requests/{request}/analyses").json()[0]["error_code"] == "interrupted"
+
+
+@pytest.mark.parametrize("recover_first", [False, True], ids=["expired", "interrupted-and-retried"])
+def test_late_valid_result_cannot_publish_after_deadline_or_replace_retry(auth_context, recover_first):
+    client, engine, user_id, _, _ = auth_context
+    request = request_id(client)
+    original, _ = begin_attempt(engine, request, user_id, uuid4(), 30)
+    with Session(engine) as db:
+        run = db.get(AnalysisRun, original.id)
+        run.started_at = now() - timedelta(seconds=31)
+        run.deadline_at = run.started_at + timedelta(seconds=30)
+        db.commit()
+    retry = None
+    if recover_first:
+        assert client.get(f"/api/v1/requests/{request}/analyses").json()[0]["error_code"] == "interrupted"
+        retry = asyncio.run(execute_analysis(engine, OfflineAdapter(), request, user_id, uuid4()))
+    late = Proposal.model_validate(asyncio.run(OfflineAdapter().analyze("Synthetic late result", "Synthetic only")))
+    result = finish_attempt(engine, original, late, None)
+    assert result.state == "failed" and result.proposal is None
+    assert result.error_code == ("interrupted" if recover_first else "timeout")
+    with Session(engine) as db:
+        assert db.scalar(select(func.count()).select_from(Task)) == 0
+        if retry:
+            current = db.get(AnalysisRun, retry.id)
+            assert current.state == "pending" and current.proposal == retry.proposal
 
 
 def test_concurrent_calls_are_serialized_and_model_has_no_database_transaction(auth_context):

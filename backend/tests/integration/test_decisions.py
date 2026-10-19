@@ -144,6 +144,9 @@ def test_concurrent_decisions_serialize_without_duplicates(auth_context, mixed):
 def test_task_insert_failure_rolls_back_decision_and_retry_is_safe(auth_context):
     client, engine, _, _, _ = auth_context
     request_id, analysis_id, _ = pending(client)
+    before_dashboard = client.get("/api/v1/dashboard").json()
+    with Session(engine) as db:
+        before_updated = db.get(CustomerRequest, request_id).updated_at
 
     def fail_after_insert(conn, cursor, statement, parameters, context, executemany):
         if statement.startswith("INSERT INTO tasks"):
@@ -158,7 +161,9 @@ def test_task_insert_failure_rolls_back_decision_and_retry_is_safe(auth_context)
     with Session(engine) as db:
         run = db.get(AnalysisRun, analysis_id)
         assert run.state == "pending" and run.decided_at is None and run.decided_by is None
+        assert db.get(CustomerRequest, request_id).updated_at == before_updated
         assert db.scalar(select(func.count()).select_from(Task)) == 0
+    assert client.get("/api/v1/dashboard").json() == before_dashboard
     assert client.post(path(request_id, analysis_id), json={"decision": "approve"}).status_code == 200
 
 

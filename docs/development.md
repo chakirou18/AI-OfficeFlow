@@ -1,6 +1,6 @@
 # Local development guide
 
-Scope: the React/FastAPI/PostgreSQL foundation, T05 CI, T06 controlled authentication and T07 request/task API and T08 request workspace/dashboard. AI/approval, deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See the sections below for account setup and API contracts; historical T04-only evidence remains in its separate verification record.
+Scope: the React/FastAPI/PostgreSQL application through T11 and T12 test consolidation. Deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See [test coverage and commands](testing.md) and the sections below for account setup and API contracts; historical T04-only evidence remains separate.
 
 ## Prerequisites and configuration
 
@@ -38,20 +38,20 @@ Expected: `frontend`, `api`, `db` healthy; `migrate` exited **0** (successful on
 
 PostgreSQL is private on the Compose network with no published host port. Change `FRONTEND_PORT`/`API_PORT` in ignored `.env` if needed; also update `APP_ORIGINS` to the exact frontend origin when changing its port. The frontend uses same-origin API paths and does not receive database credentials. Changing a password in `.env` does not rotate an already initialized PostgreSQL account; preserve the original configuration instead of deleting its data volume.
 
-## Foundation tests and schema checks
+## Deterministic backend tests and schema checks
 
 ```powershell
 docker compose --profile test run --build --rm test
 ```
 
-Current T07 CI: **49 passed** (10 unit, 39 PostgreSQL integration), with the upstream Starlette TestClient/httpx deprecation warning. This aggregate command runs migrations and both suites against `officeflow_test` on `test-db`, not the development database. That database uses tmpfs and has no host port. The runner refuses migration/test execution unless the database name ends in `_test`. These checks do not claim complete future T12 coverage.
+This aggregate command runs migrations and both unit/integration suites against real `officeflow_test` on `test-db`, not the development database. The database uses tmpfs and has no host port. The runner refuses non-`_test` database names and forces simulated mode; automatic pytest tests also deny live async HTTP. Coverage and final T12 results are linked in [testing.md](testing.md) and Issue #12. No automatic test invokes real Ollama evaluation.
 
 ```powershell
 docker compose exec -T api alembic current
 docker compose exec -T api alembic check
 ```
 
-Current migration head is `0003_requests`; the isolated PostgreSQL `alembic check` reported `No new upgrade operations detected.` No migration downgrade was executed.
+Current migration head is `0006_human_decisions`; T11 verified `alembic check` reported `No new upgrade operations detected.` T12 does not change the schema or rerun startup/persistence demonstrations. No migration downgrade was executed.
 
 ## Persistence after container restart
 

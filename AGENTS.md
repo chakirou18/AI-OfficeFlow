@@ -4,7 +4,7 @@
 
 This repository is exclusively the DataTalksClub AI Dev Tools Zoomcamp 2026 final project, targeting demonstrable coverage of 12 criteria/24 available points. Build a small generic request/task manager with synthetic data only. There is no pilot company or company-specific workflow. A01-A06 and ADRs 0001-0009 are explicitly superseded; current architecture is ADR 0010.
 
-T01-T10 are merged; T10 is PR #25 with three verified real CPU-only evaluations (docs/t10-verification.md). T11 human approval/rejection is authorized through a verified separate PR; stop before T12. Its local verification is 131 backend and 15 browser tests; Issue #11 records current required CI/merge evidence. Preserve strict validation, the 30-second deadline, persisted call limits and human-only task activation. No model/runtime update or download without explicit approval. T16 deployment and other later work remain out of scope. Required Backend checks and Frontend checks remain stable. See docs/development.md for API/MCP/model/decision commands. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
+T01-T11 are merged; T10 is PR #25 with three real CPU-only evaluations and T11 is PR #26 with atomic human decisions. T12 test consolidation is authorized through a verified PR; stop before T13. See docs/testing.md and Issue #12 for coverage and final test/CI evidence; the preserved T11 baseline is 131 backend and 15 browser tests. Preserve strict validation, the 30-second deadline, persisted call limits and human-only task activation. Real model evaluation remains opt-in and separate from automatic tests. No model/runtime update or download without explicit approval. T13+ implementation, deployment and operational exercises remain out of scope. Required Backend checks and Frontend checks remain stable. See docs/development.md for commands. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
 
 ## Read relevant modular context
 
@@ -40,7 +40,7 @@ Implemented directories: `frontend/`, `backend/` (including Alembic and unit/int
 | One-time local configuration | `python scripts/configure_local.py` | Verified; ignored generated password, existing file preserved |
 | T04 foundation startup | `docker compose up --build` | Verified for db/migrate/api/frontend; final telemetry/alert/listener services remain later work |
 | Detached startup / stop | `docker compose up -d --wait` / `docker compose down` | Verified; down preserves the volume, never implicitly add volume deletion |
-| Unit and integration suites together | `docker compose --profile test run --build --rm test` | Verified: 5 foundation tests, isolated real PostgreSQL, migration and aggregate status; not complete T12 coverage |
+| Unit and integration suites together | `docker compose --profile test run --build --rm test` | Verified T11 baseline: 131 tests; T12 coverage/results in docs/testing.md and Issue #12; isolated real PostgreSQL and forced simulation |
 | Restart persistence | `python scripts/verify_persistence.py` | Verified; restarts db/api only and compares the persisted synthetic row |
 | Schema readiness | `docker compose exec -T api alembic current` / `docker compose exec -T api alembic check` | Verified head 0001_foundation, no schema drift |
 | Python lint | `ruff check --select E9,F backend scripts` | CI installs Ruff 0.14.0; no separate Python type checker yet |
