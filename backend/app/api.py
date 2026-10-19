@@ -19,6 +19,7 @@ from app.requests import router as requests_router
 from app.analysis import router as analysis_router
 from app.decisions import router as decisions_router
 from app.model_adapter import configured_adapter
+from app.telemetry import Telemetry, TelemetryMiddleware, configured_telemetry
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +32,16 @@ class CheckResponse(BaseModel):
     created_at: datetime
 
 
-def create_app(engine: Engine | None = None) -> FastAPI:
+def create_app(engine: Engine | None = None, *, telemetry: Telemetry | None = None) -> FastAPI:
     owns_engine = engine is None
     connection_engine = engine if engine is not None else build_engine()
+    observer = telemetry if telemetry is not None else configured_telemetry()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         yield
+        if observer and telemetry is None:
+            observer.shutdown()
         if owns_engine:
             connection_engine.dispose()
 
@@ -52,10 +56,13 @@ def create_app(engine: Engine | None = None) -> FastAPI:
     )
     application.state.engine = connection_engine
     application.state.model_adapter = configured_adapter()
+    application.state.telemetry = observer
     application.include_router(auth_router)
     application.include_router(requests_router)
     application.include_router(analysis_router)
     application.include_router(decisions_router)
+    if observer:
+        application.add_middleware(TelemetryMiddleware, observer=observer)
 
     @application.middleware("http")
     async def security_headers(request: Request, call_next):

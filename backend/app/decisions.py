@@ -12,6 +12,7 @@ from app.auth import require_mutation
 from app.model_adapter import Proposal
 from app.models import AnalysisRun, CustomerRequest, DemoUser, Task
 from app.requests import RequestStatus, TaskResponse, status_expression
+from app.telemetry import CURRENT, operation_span
 
 
 class DecisionInput(BaseModel):
@@ -79,4 +80,18 @@ router = APIRouter(prefix="/api/v1/requests")
 @router.post("/{request_id}/analyses/{analysis_id}/decision", response_model=DecisionResponse)
 def decide(request_id: UUID, analysis_id: UUID, payload: DecisionInput, request: Request,
            user: DemoUser = Depends(require_mutation)):
-    return decide_analysis(request.app.state.engine, request_id, analysis_id, user.id, payload)
+    observer = CURRENT.get()
+    try:
+        with operation_span("human.decision"):
+            result = decide_analysis(request.app.state.engine, request_id, analysis_id, user.id, payload)
+        if observer:
+            observer.decision(result.analysis.state)
+        return result
+    except HTTPException as error:
+        if observer:
+            observer.decision("conflict" if error.status_code == 409 else "failed")
+        raise
+    except Exception:
+        if observer:
+            observer.decision("failed")
+        raise
