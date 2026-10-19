@@ -88,3 +88,7 @@ Controlled demo login is now required for the foundation write/read flow. Create
 from a trusted terminal with `docker compose exec api python -m app.manage_users create demo_user`.
 See [authentication setup and boundaries](docs/development.md#controlled-demo-authentication-t06).
 No default password or public signup is provided.
+
+The authenticated [request/task API](docs/development.md#request-and-task-api-t07)
+now supports immutable request creation, pagination/detail and persisted task open/done
+updates. Request-management UI, analysis and human approval remain later tasks.

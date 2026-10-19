@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.database import build_engine
 from app.models import FoundationCheck
 from app.auth import current_user, require_mutation, router as auth_router
+from app.requests import router as requests_router
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ def create_app(engine: Engine | None = None) -> FastAPI:
     )
     application.state.engine = connection_engine
     application.include_router(auth_router)
+    application.include_router(requests_router)
 
     @application.middleware("http")
     async def security_headers(request: Request, call_next):

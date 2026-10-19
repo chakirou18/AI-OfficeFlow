@@ -153,3 +153,39 @@ are committed. The tests now cover sign-in, reload, write failure and sign-out.
 Security references: [Python scrypt](https://docs.python.org/3/library/hashlib.html#hashlib.scrypt),
 [OWASP sessions](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html),
 and [OWASP CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).
+
+## Request and task API (T07)
+
+All routes below require a demo session. POST/PATCH also require the configured
+Origin and `X-CSRF-Token` returned by login or `/auth/me`.
+
+| Method and path | Contract |
+| --- | --- |
+| `POST /api/v1/requests` | Only `title` and `description`; trimmed lengths 1-200 and 1-5000. Returns 201 with immutable text, UUID, creator handle, timestamps, new status and empty tasks. |
+| `GET /api/v1/requests` | `limit` 1-50 (default 20), `offset` 0-10000, optional `status`; returns items/total/limit/offset. Stable descending created_at/UUID order. |
+| `GET /api/v1/requests/{id}` | Original text, creator, timestamps, derived status and persisted tasks. |
+| `PATCH /api/v1/requests/{id}/tasks/{task_id}` | Only `state: open` or `state: done`; persists atomically, serializing updates through a parent request lock. Repeating the same state preserves timestamps. |
+
+Invalid fields/limits/UUIDs return 422; missing records or mismatched request/task IDs
+return 404; missing/invalid sessions return 401; CSRF/Origin failures return 403.
+There are no request edit/delete endpoints and no public task-creation endpoint.
+Accounts share the same synthetic workspace; access is not restricted to the creator.
+Creator identity comes from the session, never the input payload.
+
+Status derives from persisted task rows: no tasks means `new`, any open task means
+`in_progress`, and all tasks done means `completed`. `awaiting_review` is a reserved
+filter which currently returns no rows; pending analyses and their status integration
+belong to T09/T11. T07 does not claim analysis/approval workflow completion.
+
+Migration `0003_requests` adds requests/tasks, foreign keys, state/priority/length
+constraints and unique `(analysis_id, suggestion_index)` source identity. Analysis IDs
+are reserved UUIDs without an analysis foreign key until the analysis table exists in
+T09/T11. Only future human approval may create tasks through the app; T07's integration
+tests insert explicitly synthetic approved-task fixtures directly into PostgreSQL.
+No task seed endpoint or implicit approval is provided. Request-management UI is T08.
+
+Run the existing aggregate Compose test command for request validation, independent
+session reads, fresh application instances, maximum page size, deterministic pagination,
+state/filter derivation, repeat updates, database constraints and auth/CSRF/ops denials.
+`docker compose --profile test run --rm test alembic check` verifies ORM/migration drift.
+Actual local/CI counts and results are recorded on Issue #7.

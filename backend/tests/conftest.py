@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.api import create_app
 from app.auth import hash_password
 from app.database import build_engine, database_url
-from app.models import DemoUser
+from app.models import CustomerRequest, DemoUser
 
 ORIGIN = "http://testserver"
 
@@ -37,6 +37,7 @@ def auth_context(monkeypatch):
             yield client, engine, user_id, handle, password
     finally:
         with Session(engine) as db:
+            db.execute(delete(CustomerRequest).where(CustomerRequest.creator_id == user_id))
             db.execute(delete(DemoUser).where(DemoUser.id == user_id))
             db.commit()
         engine.dispose()
