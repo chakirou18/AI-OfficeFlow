@@ -47,6 +47,9 @@ services:
       OLLAMA_MAX_CALLS: ${OLLAMA_MAX_CALLS:-20}
       TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-true}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      DEV_ANALYSIS_FAILURE_REQUEST_ID: ${DEV_ANALYSIS_FAILURE_REQUEST_ID:-}
+      ENABLE_DEV_FAULTS: ${ENABLE_DEV_FAULTS:-false}
+      APP_ENV: development
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -112,8 +115,30 @@ services:
     command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=7d", "--enable-feature=exemplar-storage"]
     volumes:
       - ./infra/observability/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/observability/analysis-alerts.yaml:/etc/prometheus/analysis-alerts.yaml:ro
+      - ./infra/observability/analysis-alerts.test.yaml:/etc/prometheus/analysis-alerts.test.yaml:ro
       - prometheus_data:/prometheus
     depends_on: [otel-collector]
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command: ["--config.file=/etc/alertmanager/config.yaml", "--storage.path=/alertmanager", "--data.retention=168h", "--cluster.listen-address="]
+    volumes:
+      - ./infra/observability/alertmanager.yaml:/etc/alertmanager/config.yaml:ro
+      - alertmanager_data:/alertmanager
+    secrets: [alert_webhook_token]
+    depends_on: [oncall-listener]
+
+  oncall-listener:
+    image: officeflow-api:local
+    build: *api-build
+    command: ["uvicorn", "app.oncall:create_listener", "--factory", "--host", "0.0.0.0", "--port", "8010", "--no-access-log"]
+    environment:
+      ALERT_TOKEN_FILE: /run/secrets/alert_webhook_token
+    secrets: [alert_webhook_token]
+    volumes:
+      - oncall_data:/data
+    # No host ports, app proxy route, model, ops token, or database credentials.
 
   loki:
     image: grafana/loki:3.4.2
@@ -152,6 +177,8 @@ services:
     depends_on: [prometheus, loki, tempo]
 
 volumes:
+  alertmanager_data:
+  oncall_data:
   postgres_data:
   prometheus_data:
   loki_data:
@@ -159,5 +186,7 @@ volumes:
   grafana_data:
 
 secrets:
+  alert_webhook_token:
+    file: ./artifacts/alert-webhook-token
   grafana_admin_password:
     file: ./artifacts/grafana-admin-password

@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir --require-hashes -r requirements.lock \
 COPY app ./app
 COPY alembic.ini ./alembic.ini
 COPY migrations ./migrations
+RUN mkdir -p /data && chown app:app /data
 
 FROM base AS test
 COPY requirements-test.lock ./requirements-test.lock

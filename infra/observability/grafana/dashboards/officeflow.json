@@ -16,6 +16,27 @@
   },
   "panels": [
     {
+      "id": 8,
+      "title": "Analysis HTTP failure ratio (2m)",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 0, "y": 31, "w": 12, "h": 7},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1,
+        "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 0.5}]}}, "overrides": []},
+      "targets": [{"refId": "A", "expr": "officeflow:analysis_failures:2m / officeflow:analysis_attempts:2m", "legendFormat": "{{deployment_environment}}"}]
+    },
+    {
+      "id": 9,
+      "title": "Analysis attempts (2m) and alert state",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"x": 12, "y": 31, "w": 12, "h": 7},
+      "targets": [
+        {"refId": "A", "expr": "officeflow:analysis_attempts:2m", "legendFormat": "attempts {{deployment_environment}}"},
+        {"refId": "B", "expr": "ALERTS{alertname=\"AnalysisHttpFailureRatio\"}", "legendFormat": "{{alertstate}}"}
+      ]
+    },
+    {
       "id": 1,
       "title": "HTTP request rate",
       "type": "timeseries",

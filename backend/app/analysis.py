@@ -149,6 +149,7 @@ def analysis_config(request: Request):
 @router.post("/{request_id}/analyses", response_model=AnalysisResponse, status_code=201)
 async def analyze(request_id: UUID, request: Request, idempotency_key: UUID = Header(),
                   user: DemoUser = Depends(require_mutation)):
+    request.app.state.dev_analysis_fault.check(request.app.state.engine, request_id, user)
     run = await execute_analysis(request.app.state.engine, request.app.state.model_adapter, request_id, user.id, idempotency_key)
     payload = AnalysisResponse.model_validate(run).model_dump(mode="json")
     if run.state == "failed":

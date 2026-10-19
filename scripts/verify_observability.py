@@ -131,7 +131,7 @@ with Session(build_engine()) as db:
     for item in series["data"]:
         assert not ({"request_id", "user_id", "trace_id", "span_id"} & item.keys())
     dashboard = call(grafana + "/api/dashboards/uid/officeflow")
-    assert len(dashboard["dashboard"]["panels"]) == 7
+    assert {1, 2, 3, 4, 5, 6, 7} <= {panel["id"] for panel in dashboard["dashboard"]["panels"]}
     sources = call(grafana + "/api/datasources")
     assert {"prometheus", "loki", "tempo"} <= {item["uid"] for item in sources}
     report = {"trace_id": trace_id, "metrics_series": len(metrics["data"]["result"]),

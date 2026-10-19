@@ -11,6 +11,10 @@ def main():
         raise SystemExit("Run python scripts/configure_local.py first")
     directory = ROOT / "artifacts"
     directory.mkdir(exist_ok=True)
+    alert_token = directory / "alert-webhook-token"
+    if not alert_token.exists():
+        alert_token.write_text(secrets.token_urlsafe(32), encoding="utf-8")
+        alert_token.chmod(0o600)
     password = directory / "grafana-admin-password"
     if not password.exists():
         password.write_text(secrets.token_urlsafe(32), encoding="utf-8")
@@ -22,7 +26,7 @@ def main():
         lines.append("OPS_TOKEN=" + secrets.token_urlsafe(32))
         config.write_text("\n".join(lines) + "\n", encoding="utf-8")
         config.chmod(0o600)
-    print("Private Grafana password and read-only ops credential configured; values not displayed.")
+    print("Private Grafana, alert webhook and read-only ops credentials configured; values not displayed.")
 
 
 if __name__ == "__main__":

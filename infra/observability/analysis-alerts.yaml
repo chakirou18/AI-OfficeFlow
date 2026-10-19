@@ -1,0 +1,15 @@
+groups:
+  - name: officeflow-analysis
+    rules:
+      - record: officeflow:analysis_attempts:2m
+        expr: sum by (deployment_environment) (increase(officeflow_http_requests_total{service_name="officeflow-api",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses"}[2m]))
+      - record: officeflow:analysis_failures:2m
+        expr: sum by (deployment_environment) (increase(officeflow_http_requests_total{service_name="officeflow-api",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status=~"5.."}[2m]))
+      - alert: AnalysisHttpFailureRatio
+        expr: (officeflow:analysis_failures:2m / officeflow:analysis_attempts:2m > 0.5) and (officeflow:analysis_attempts:2m >= 5)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: Analysis HTTP failures exceed 50 percent with at least five attempts in two minutes
+          runbook: docs/runbooks/analysis-http-failures.md

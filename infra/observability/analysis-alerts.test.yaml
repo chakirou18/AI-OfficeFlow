@@ -1,0 +1,77 @@
+rule_files: [analysis-alerts.yaml]
+evaluation_interval: 15s
+tests:
+  - name: Exactly five attempts satisfies the inclusive minimum
+    interval: 30s
+    input_series:
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="503"}'
+        values: '0+1.25x12'
+    promql_expr_test:
+      - expr: officeflow:analysis_attempts:2m
+        eval_time: 2m
+        exp_samples:
+          - labels: 'officeflow:analysis_attempts:2m{deployment_environment="local"}'
+            value: 5
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts:
+          - exp_labels: {severity: warning, deployment_environment: local}
+            exp_annotations:
+              summary: Analysis HTTP failures exceed 50 percent with at least five attempts in two minutes
+              runbook: docs/runbooks/analysis-http-failures.md
+  - name: More than half, five attempts, full minute hold and resolution
+    interval: 15s
+    input_series:
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="503"}'
+        values: '0+1x16 16+0x16'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []
+      - eval_time: 1m45s
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []
+      - eval_time: 2m15s
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts:
+          - exp_labels: {severity: warning, deployment_environment: local}
+            exp_annotations:
+              summary: Analysis HTTP failures exceed 50 percent with at least five attempts in two minutes
+              runbook: docs/runbooks/analysis-http-failures.md
+      - eval_time: 7m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []
+  - name: Exactly fifty percent never fires
+    interval: 15s
+    input_series:
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="503"}'
+        values: '0+1x24'
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="201"}'
+        values: '0+1x24'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []
+  - name: Four attempts per window never fires, unrelated traffic excluded
+    interval: 15s
+    input_series:
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="503"}'
+        values: '0+0.5x24'
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="GET",http_route="/api/v1/health/ready",http_status="503"}'
+        values: '0+100x24'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []
+  - name: Auth and conflict errors are not server failures
+    interval: 15s
+    input_series:
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="403"}'
+        values: '0+5x24'
+      - series: 'officeflow_http_requests_total{service_name="officeflow-api",deployment_environment="local",http_method="POST",http_route="/api/v1/requests/{request_id}/analyses",http_status="409"}'
+        values: '0+5x24'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: AnalysisHttpFailureRatio
+        exp_alerts: []

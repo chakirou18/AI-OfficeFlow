@@ -1,0 +1,25 @@
+global:
+  resolve_timeout: 2m
+route:
+  receiver: discard
+  group_by: [alertname, deployment_environment]
+  group_wait: 5s
+  group_interval: 10s
+  repeat_interval: 4h
+  routes:
+    - receiver: oncall
+      matchers:
+        - alertname="AnalysisHttpFailureRatio"
+        - deployment_environment="local"
+receivers:
+  - name: discard
+  - name: oncall
+    webhook_configs:
+      - url: http://oncall-listener:8010/webhook
+        send_resolved: true
+        max_alerts: 10
+        http_config:
+          follow_redirects: false
+          authorization:
+            type: Bearer
+            credentials_file: /run/secrets/alert_webhook_token
