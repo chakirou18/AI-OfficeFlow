@@ -4,7 +4,7 @@
 
 This repository is exclusively the DataTalksClub AI Dev Tools Zoomcamp 2026 final project, targeting demonstrable coverage of 12 criteria/24 available points. Build a small generic request/task manager with synthetic data only. There is no pilot company or company-specific workflow. A01-A06 and ADRs 0001-0009 are explicitly superseded; current architecture is ADR 0010.
 
-T04 now has a local React/FastAPI/PostgreSQL foundation, locked dependencies, Alembic migration, health/connectivity checks and passing foundation tests on `feat/t04-full-stack-foundation`, awaiting review. See the T04 verification record. Request/task management, authentication, AI, CI and operational services are not implemented. The user authorized T04 implementation/testing and a feature-branch PR; do not implement T05+ or merge/close T04 before review. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
+T04 is merged through PR #19 with verified foundation evidence. T05 adds required backend/frontend CI on pull requests and main; deployment remains T16. The current authorization ends at T05. Request/task management, authentication, AI and operational services remain later tasks. Keep claims tied to actual evidence. Preserve valid user changes, T01-T18 identities, historical ADRs and Git history; never force push or rewrite history.
 
 ## Read relevant modular context
 
@@ -43,13 +43,13 @@ Implemented directories: `frontend/`, `backend/` (including Alembic and unit/int
 | Unit and integration suites together | `docker compose --profile test run --build --rm test` | Verified: 5 foundation tests, isolated real PostgreSQL, migration and aggregate status; not complete T12 coverage |
 | Restart persistence | `python scripts/verify_persistence.py` | Verified; restarts db/api only and compares the persisted synthetic row |
 | Schema readiness | `docker compose exec -T api alembic current` / `docker compose exec -T api alembic check` | Verified head 0001_foundation, no schema drift |
-| Python lint/types | `ruff check backend custom-agent tools tests` / `mypy backend` | Planned; configuration/tools absent |
+| Python lint | `ruff check --select E9,F backend scripts` | CI installs Ruff 0.14.0; no separate Python type checker yet |
 | Frontend production build | `npm.cmd --prefix frontend run build` | Verified: typecheck and Vite build; npm without .cmd works on non-Windows shells |
 | Frontend browser smoke | `$env:BROWSER_CHANNEL='msedge'` then `npm.cmd --prefix frontend run test:e2e` | Verified: 2 tests using installed Edge; see guide for browser prerequisite |
 | Frontend development server | `npm --prefix frontend run dev` | Implemented script, not exercised during T04; built Compose frontend was tested |
-| Frontend lint | `npm --prefix frontend run lint` | Planned; no lint script exists yet |
+| Frontend lint | `npm --prefix frontend run lint` | Oxlint checks source, tests and Vite/Playwright configuration |
 
-Do not run planned commands as though they work. Default supported tests run in containers; a bare host pytest command needs its own dependency/database setup and is not advertised as verified. Update command status only after actual checks. No CI workflow has been created for T05.
+Do not run planned commands as though they work. Default supported tests run in containers; a bare host pytest command needs its own dependency/database setup and is not advertised as verified. Update command status only after actual checks. CI is defined in `.github/workflows/ci.yml`; keep required job names Backend checks and Frontend checks stable. Main requires both checks, including administrator merges.
 
 ## Security and final evidence
 

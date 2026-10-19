@@ -78,3 +78,8 @@ Docker Compose will start the full demonstration stack with one command. GitHub 
 The foundation commands above are verified; later feature/operational commands remain planned until tested. The grading checklist distinguishes T04 evidence from the unfinished full application. The full target includes correlated stored metrics/traces/logs, a user-impact alert, and an automatically triggered on-call agent that actually repairs a controlled incident. These have not been demonstrated. No GitHub Actions workflow or public deployment is included in T04.
 
 All seven Module 5 Agent Extension Pack requirements remain required; Module 5 has no separate graded homework. **Three peer reviews are mandatory to pass**, independently of the project score. Deployment URLs, CI badges, test results and demonstration recordings will be added only after they exist.
+
+CI runs backend lint/unit/PostgreSQL integration tests and frontend lint/typechecked
+builds on pull requests and main. Both jobs are required for merging. See
+[CI workflow](.github/workflows/ci.yml) and [CI commands](docs/development.md#continuous-integration-t05).
+Deployment automation remains T16.

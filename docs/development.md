@@ -85,3 +85,28 @@ On another machine, install Node 24 if using these optional host checks and ensu
 If Docker reports permission/connection errors, check Docker Desktop is running in Linux-container mode and that the terminal has Docker access. The agent's sandbox denied daemon/cache access; retrying through the authorized host tool succeeded, so this was not a missing Docker installation. If a required tool is absent, install it through its official installer before attempting the command: [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/), [Python](https://www.python.org/downloads/), and optional [Node.js](https://nodejs.org/en/download). Run `docker version`, `docker compose version` and `python --version` afterward; no unavailable-tool test is counted as passed.
 
 For reproducible source verification and actual failures/fixes, see [t04-verification.md](t04-verification.md). No `.github/workflows` is added; stop at the T04 PR review.
+
+## Continuous integration (T05)
+
+`.github/workflows/ci.yml` runs on every pull request and push to `main`.
+`Backend checks` runs Ruff 0.14.0 (`--select E9,F`), unit tests, Alembic migrations,
+and integration tests against a disposable PostgreSQL 17 service and `_test` database.
+`Frontend checks` runs locked `npm ci`, Oxlint, and `npm run build` (including strict
+TypeScript checking). Both jobs are required by main branch protection, including
+administrator merges. CI has read-only repository permissions and no deployment,
+model or production credentials. Its public database password is an ephemeral fixture.
+
+For equivalent focused checks, install `backend/requirements-test.lock` with
+`pip install --require-hashes`, install `ruff==0.14.0`, and run
+`ruff check --select E9,F backend scripts`. From `backend`, run
+`python -m pytest tests/unit -v`; integration additionally needs the isolated test
+database configuration and `python -m alembic upgrade head` before
+`python -m pytest tests/integration -v`. Existing Compose test instructions above
+remain the simplest full database test command. Frontend checks are
+`npm --prefix frontend run lint` and `npm --prefix frontend run build` after `npm ci`.
+
+T16 can consume a successful CI run on trusted `main` via a separate
+`workflow_run` workflow, checking success, repository, branch and commit before
+using deployment credentials. PR runs never deploy. Automatic development deployment,
+manual production promotion and environment approvals are deliberately not implemented
+in T05. Exact CI and merge-gate verification evidence is recorded in Issue #5.
