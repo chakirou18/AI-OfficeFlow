@@ -2,7 +2,7 @@
 import { api } from './api'
 import { FoundationApp } from './Foundation'
 import { statusLabels } from './types'
-import type { Dashboard, Detail, Page, RequestItem, Status, Task } from './types'
+import type { AnalysisConfig, Dashboard, Detail, Page, RequestItem, Status, Task } from './types'
 
 type Route = { view: string; id?: string }
 function currentRoute(): Route {
@@ -123,6 +123,8 @@ function RequestList({ revision }: { revision: number }) {
 }
 
 function RequestDetail({ id, revision, changed }: { id: string; revision: number; changed: () => void }) {
+  const [config, setConfig] = useState<AnalysisConfig | null>(null)
+  const [analysisError, setAnalysisError] = useState('')
   const [detail, setDetail] = useState<Detail | null>(null); const [loading, setLoading] = useState(true)
   const [error, setError] = useState(''); const [mutationError, setMutationError] = useState(''); const [busy, setBusy] = useState(''); const [retry, setRetry] = useState(0)
   useEffect(() => {
@@ -131,6 +133,15 @@ function RequestDetail({ id, revision, changed }: { id: string; revision: number
       .catch(cause => { if (active) setError(cause.message) }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [id, revision, retry])
+  useEffect(() => {
+    api<AnalysisConfig>('/api/v1/requests/analysis/config').then(setConfig).catch(() => setConfig(null))
+  }, [])
+  async function analyze() {
+    setBusy('analysis'); setAnalysisError('')
+    try { await api(`/api/v1/requests/${id}/analyses`, 'POST', undefined, crypto.randomUUID()) }
+    catch (cause) { setAnalysisError(cause instanceof Error ? cause.message : 'Analysis failed.') }
+    finally { setBusy(''); setRetry(value => value + 1) }
+  }
   async function update(task: Task) {
     setBusy(task.id); setMutationError('')
     try { await api(`/api/v1/requests/${id}/tasks/${task.id}`, 'PATCH', { state: task.state === 'open' ? 'done' : 'open' }); changed() }
@@ -142,6 +153,16 @@ function RequestDetail({ id, revision, changed }: { id: string; revision: number
       <article className="panel request-detail"><div className="detail-title"><h2>{detail.title}</h2><Badge status={detail.status} /></div>
         <p className="muted">Created by {detail.creator_handle} · {date(detail.created_at)}</p><h3>Description</h3><p className="request-description">{detail.description}</p>
         <dl className="detail-meta"><div><dt>Request ID</dt><dd>{detail.id}</dd></div><div><dt>Last updated</dt><dd>{date(detail.updated_at)}</dd></div></dl></article>
+      <section className="panel"><div className="panel-heading"><div><h2>Analysis suggestions</h2>
+        <p>{config ? config.provider_mode === 'simulated' ? 'Simulated mode · deterministic offline output' : `Real local model · Ollama ${config.provider_model}` : 'Analysis configuration unavailable'}</p></div>
+        {!detail.tasks.length && (!detail.analysis || detail.analysis.state === 'failed') && <button className="primary" disabled={!!busy || !config} onClick={() => void analyze()}>{busy === 'analysis' ? 'Analyzing… (up to 30 seconds)' : detail.analysis ? 'Retry analysis' : 'Analyze request'}</button>}</div>
+        {analysisError && <p className="error" role="alert">{analysisError} Refresh to check the saved outcome before retrying.</p>}
+        {detail.analysis && <><p>Saved attempt: {detail.analysis.provider_mode === 'simulated' ? 'Simulated' : `Real Ollama ${detail.analysis.provider_model}`} · {detail.analysis.state}</p>
+          {detail.analysis.error_code && <p role="alert">Analysis failed: {detail.analysis.error_code}. No tasks were created.</p>}
+          {detail.analysis.proposal && <><p>{detail.analysis.proposal.summary}</p><p>Pending human review. Suggestions are inactive; approval is not available yet.</p>
+            <ul className="task-list">{detail.analysis.proposal.tasks.map((task, index) => <li className="task-item" key={index}><div><h3>{task.title}</h3><span className={`priority ${task.priority}`}>{task.priority} priority</span><p>{task.rationale}</p></div></li>)}</ul></>}
+        </>}
+      </section>
       <section className="panel"><div className="panel-heading"><div><h2>Approved tasks</h2><p>Track saved work and update its progress.</p></div><span className="count-pill">{detail.tasks.length}</span></div>
         {mutationError && <p className="error" role="alert">{mutationError} No successful update is claimed. Please retry.</p>}
         {detail.tasks.length ? <ul className="task-list">{detail.tasks.map(task => <li key={task.id} className="task-item"><div><div className="task-heading"><h3>{task.title}</h3><span className={`priority ${task.priority}`}>{task.priority} priority</span><span className={`badge ${task.state}`}>{task.state === 'done' ? 'Done' : 'Open'}</span></div><p>{task.rationale}</p></div>

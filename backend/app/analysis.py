@@ -6,11 +6,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, ValidationError
-from sqlalchemy import Engine, select, update
+from sqlalchemy import Engine, func, select, text, update
 from sqlalchemy.orm import Session
 
 from app.auth import current_user, require_mutation
-from app.model_adapter import ModelAdapter, Proposal
+from app.model_adapter import InvalidModelOutput, ModelAdapter, Proposal
 from app.models import AnalysisRun, CustomerRequest, DemoUser, Task
 
 DEADLINE_SECONDS = 30
@@ -26,6 +26,7 @@ class AnalysisResponse(BaseModel):
     request_id: UUID
     state: str
     provider_mode: str
+    provider_model: str | None
     schema_version: str
     prompt_version: str
     proposal: Proposal | None
@@ -49,7 +50,7 @@ def lock_request(db: Session, request_id: UUID):
     return record
 
 
-def begin_attempt(engine: Engine, request_id: UUID, user_id: UUID, key: UUID, seconds: float):
+def begin_attempt(engine: Engine, request_id: UUID, user_id: UUID, key: UUID, seconds: float, adapter=None):
     with Session(engine, expire_on_commit=False) as db:
         record = lock_request(db, request_id)
         expire_interrupted(db, request_id)
@@ -61,7 +62,19 @@ def begin_attempt(engine: Engine, request_id: UUID, user_id: UUID, key: UUID, se
                      AnalysisRun.state.in_(["running", "pending", "approved"]))) or db.scalar(select(Task.id).where(Task.request_id == request_id).limit(1)):
             raise HTTPException(409, "This request already has an active analysis or approved tasks")
         stamp = now()
+        mode = getattr(adapter, "provider_mode", "simulated")
+        if mode == "ollama":
+            # Serialize real-call reservation across processes; consume before dispatch.
+            db.execute(text("SELECT pg_advisory_xact_lock(101010)"))
+            used = db.scalar(select(func.count()).select_from(AnalysisRun).where(AnalysisRun.provider_mode == "ollama"))
+            if used >= adapter.max_calls:
+                raise HTTPException(429, "Local model call allowance exhausted")
+            if db.scalar(select(AnalysisRun.id).where(AnalysisRun.provider_mode == "ollama",
+                         AnalysisRun.state == "running", AnalysisRun.deadline_at > stamp).limit(1)):
+                raise HTTPException(429, "Local model is busy; retry explicitly later")
         run = AnalysisRun(request_id=request_id, requested_by=user_id, idempotency_key=key,
+                          provider_mode=mode, provider_model=getattr(adapter, "provider_model", None),
+                          prompt_version=getattr(adapter, "prompt_version", "offline-v1"),
                           state="running", started_at=stamp, deadline_at=stamp + timedelta(seconds=seconds))
         db.add(run)
         db.commit()
@@ -90,7 +103,7 @@ async def execute_analysis(engine: Engine, adapter: ModelAdapter, request_id: UU
                            key: UUID, *, timeout_seconds: float = DEADLINE_SECONDS) -> AnalysisRun:
     if not 0 < timeout_seconds <= DEADLINE_SECONDS:
         raise ValueError("Analysis deadline must be within 30 seconds")
-    run, content = begin_attempt(engine, request_id, user_id, key, timeout_seconds)
+    run, content = begin_attempt(engine, request_id, user_id, key, timeout_seconds, adapter)
     if content is None:
         return run
     proposal, error = None, None
@@ -101,7 +114,7 @@ async def execute_analysis(engine: Engine, adapter: ModelAdapter, request_id: UU
             proposal = Proposal.model_validate(await adapter.analyze(*content))
     except TimeoutError:
         error = "timeout"
-    except ValidationError:
+    except (ValidationError, InvalidModelOutput):
         error = "invalid_output"
     except asyncio.CancelledError:
         finish_attempt(engine, run, None, "interrupted")
@@ -112,6 +125,12 @@ async def execute_analysis(engine: Engine, adapter: ModelAdapter, request_id: UU
 
 
 router = APIRouter(prefix="/api/v1/requests", dependencies=[Depends(current_user)])
+
+
+@router.get("/analysis/config")
+def analysis_config(request: Request):
+    adapter = request.app.state.model_adapter
+    return {"provider_mode": adapter.provider_mode, "provider_model": adapter.provider_model}
 
 
 @router.post("/{request_id}/analyses", response_model=AnalysisResponse, status_code=201)
