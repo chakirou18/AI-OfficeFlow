@@ -39,6 +39,7 @@ build/
 coverage/
 playwright-report/
 test-results/
+/artifacts/
 
 # Local data, database dumps, and operational output
 /data/
