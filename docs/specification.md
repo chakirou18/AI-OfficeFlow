@@ -4,22 +4,26 @@ Status: proposed requirements; none are implemented or verified. Acceptance crit
 
 ## Scope and assumptions
 
-The MVP serves one configured business per deployment. Employees enter plain-text customer requests; two business agents generate proposals; authorized humans apply approved changes. The pilot business is Entropie Energies, subject to stakeholder validation. Business configuration defines required fields and terminology so another sector can use the same core workflow.
+The MVP serves one configured business per deployment. Employees enter plain-text customer requests; two business agents generate proposals; authorized humans apply approved changes. AI OfficeFlow is a generic SME application; Entropie Energies is a proposed pilot use case, not an approving stakeholder or an integrated company system. Business configuration defines required fields and terminology so another sector can use the same core workflow.
 
 No outbound communication or external-system mutation is included. The platform does not provide binding energy advice or generate executable commercial commitments. Account provisioning is controlled; public self-registration is excluded.
 
 ## Pilot assumptions requiring confirmation
 
-T01 audit status: these are proposed project choices, not confirmed Entropie operating procedures. The user identified the intended pilot and sector; this does not validate detailed workflows or grant access to company systems/data. User confirmation has been requested; no response or authorized stakeholder sign-off is recorded yet. Record explicit decisions on Issue #1 before marking its pilot-review criterion complete. An unresolved assumption may be deliberately deferred for a synthetic prototype only if that boundary is explicitly accepted and documented.
+The product owner has explicitly accepted a temporary **generic SME, synthetic-only prototype** boundary. A01–A06 all remain provisional: their review is complete through an accepted deferral, not through validation of Entropie's business practices. This resolves T01's requirements-review blocker without claiming company approval.
+
+Temporary product decisions: use synthetic data only in development, tests, model evaluation and public demonstrations; do not connect to real company systems; require human approval for consequential business actions; defer real customer data, company integrations and operational fault-injection authorization. Architectural design of a recovery exercise is permitted, but execution requires later explicit authorization. These decisions authorize the current documentation/design work, not application implementation, deployment, spending or real-data processing.
 
 | ID | Proposed assumption | Required confirmation / decision owner | Current status |
 | --- | --- | --- | --- |
-| A01 | Manual text entry, one business per deployment, internal tasks only, and human approval are sufficient for the initial pilot | User/product owner confirms scope; business stakeholder later validates fit | Pending |
-| A02 | Service type, site location, customer contact, project description and desired timeframe are the correct required fields | Authorized pilot stakeholder confirms fields and supplies only synthetic examples initially | Pending |
-| A03 | Employees can view requests across the single-business deployment; reviewer, administrator and operator permissions are separate | User identifies role policy and who is authorized to validate it; private identities need not be published | Pending |
-| A04 | Owners may be unassigned, deadlines are advisory, and a reviewer resolves missing information before work begins | Pilot workflow owner confirms assignment, business calendar/timezone and deadline policy; no default SLA is promised | Pending |
-| A05 | Development, CI, screenshots and public demonstrations use synthetic data; real pilot data/provider processing is deferred | User confirms synthetic-only prototype boundary; authorized business owner must separately approve any later real-data use, retention and provider handling | Pending; synthetic data remains the safe working default |
-| A06 | Staging fault injection and operator-approved recovery are acceptable for the demonstration | User/operator confirms later test environment and action boundary before an operational exercise | Pending; no operational exercise authorized by this audit |
+| A01 | Manual text entry, one business per deployment, internal tasks only, and human approval are sufficient for the initial pilot | Authorized business stakeholder must later validate fit; generic design may use this provisional scope | Provisional; product owner accepts prototype-only deferral |
+| A02 | Service type, site location, customer contact, project description and desired timeframe are the correct required fields | Authorized pilot stakeholder must confirm fields; examples remain synthetic and profile-configurable | Provisional; company field validation deferred |
+| A03 | Employees can view requests across the single-business deployment; reviewer, administrator and operator permissions are separate | Authorized pilot stakeholder must validate actual visibility and role assignments; generic role policy is a design default | Provisional; company access-policy validation deferred |
+| A04 | Owners may be unassigned, deadlines are advisory, and a reviewer resolves missing information before work begins | Business workflow owner must confirm calendar/timezone, assignment and deadline rules; no company SLA is promised | Provisional; business policy validation deferred |
+| A05 | Development, CI, screenshots and public demonstrations use synthetic data; real pilot data/provider processing is deferred | Synthetic-only boundary is now a firm product decision; any later real-data use needs separate authorized business approval, retention and provider review | Provisional as a pilot assumption; synthetic-only prototype rule accepted, real data deferred |
+| A06 | Staging fault injection and operator-approved recovery are acceptable for the demonstration | User/operator must later authorize exact environment, flag, duration and recovery action before an exercise | Provisional; operational fault-injection authorization explicitly deferred |
+
+Revisit these assumptions before onboarding a real business or authorizing an operational exercise. Record any later stakeholder decision and affected specification/permission changes on the relevant public issue using sanitized evidence. The product owner has not claimed to represent Entropie or approved its workflows.
 
 Architecture choices such as provider, hosting, identity/session mechanism, trace storage and release controls remain T03 decisions. These must not be conflated with stakeholder confirmation of business behavior. See [permissions.md](permissions.md) for data authorization boundaries.
 

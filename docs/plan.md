@@ -39,7 +39,7 @@ The [Module 5 checklist](module5-checklist.md) maps all seven required Extension
 
 **Three peer reviews are mandatory to pass**, independently of points. T18 owns completion evidence for three distinct course-assigned reviews; dates/assignments must be checked on the course platform. Do not publish private feedback or claim completion before submission is confirmed.
 
-T01 remains open pending explicit decisions on the [pilot assumption register](specification.md#pilot-assumptions-requiring-confirmation). Review T02 for completion only after T01's dependency is satisfied. T03 architecture decisions follow that requirements gate; independent research does not waive it.
+The product owner has accepted the [synthetic-only generic prototype boundary](specification.md#pilot-assumptions-requiring-confirmation), explicitly deferring all A01–A06 stakeholder validation. This satisfies the T01 pilot-review gate without claiming Entropie approval. Record T01 completion before reviewing T02. T03 design proceeds under that boundary; real customer data and operational fault-injection authorization remain deferred.
 
 ## Delivery discipline
 

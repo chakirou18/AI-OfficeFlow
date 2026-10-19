@@ -2,7 +2,7 @@
 
 Audit task: [T01 / Issue #1](https://github.com/chakirou18/AI-OfficeFlow/issues/1). This is an evidence inventory, not an awarded score or a claim that the application works.
 
-The [T01 audit evidence](https://github.com/chakirou18/AI-OfficeFlow/issues/1#issuecomment-6268673549) records the inspected sources, document checks, gaps and pilot-confirmation blocker. T01 remains open with `status:blocked`; only its source-linking, criterion-mapping and gap-recording acceptance items have been checked.
+The [T01 audit evidence](https://github.com/chakirou18/AI-OfficeFlow/issues/1#issuecomment-6268673549) records the inspected sources, document checks, gaps and former pilot-confirmation blocker. The product owner has now explicitly accepted a generic synthetic-only prototype and deferral of A01–A06 stakeholder validation, real data and fault-injection authorization. This satisfies requirements review through a documented deferral, not company approval. See Issue #1 for the final review and live state.
 
 ## Sources and scoring
 
@@ -49,4 +49,4 @@ The maximum is **24 points** across twelve criteria. The pinned project page spe
 | Peer reviews missing | T18 adds three required reviews and platform confirmation before course completion is claimed. |
 | Entropie fields, roles, deadlines and real-data handling unvalidated | T01 records pending decisions in the specification; public demos remain synthetic. |
 
-Each future evidence update must identify the source commit, command or demonstration, actual outcome, and remaining limitation. Keep issue acceptance checkboxes unchecked where evidence is incomplete. T01 stays open pending pilot confirmation; do not review T02 for closure before its dependency is satisfied.
+Each future evidence update must identify the source commit, command or demonstration, actual outcome, and remaining limitation. Keep issue acceptance checkboxes unchecked where evidence is incomplete. T01 may complete on the explicit prototype deferral; review T02 only after that completion is recorded. Generic prototype governance does not verify Entropie workflows or runtime behavior.
