@@ -1,6 +1,6 @@
-# T04 local foundation guide
+# Local development guide
 
-Scope: the frontend/API/PostgreSQL foundation for [Issue #4](https://github.com/chakirou18/AI-OfficeFlow/issues/4). This is not the request/task application yet. The only write operation saves a fixed synthetic connectivity record. No authentication, AI, CI, deployment, telemetry or incident feature is implemented; keep this foundation local.
+Scope: the React/FastAPI/PostgreSQL foundation, T05 CI, T06 controlled authentication and T07 request/task API. Request UI, AI/approval, deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See the sections below for account setup and API contracts; historical T04-only evidence remains in its separate verification record.
 
 ## Prerequisites and configuration
 
@@ -12,9 +12,9 @@ From the repository root, perform this one-time setup:
 python scripts/configure_local.py
 ```
 
-It creates an ignored `.env` with a generated local database password and default loopback ports. It does not print the password or overwrite an existing file. [.env.example](../.env.example) documents the names with a placeholder, not usable credentials. The API rejects that placeholder. Do not commit `.env` or use this unauthenticated foundation as a public deployment.
+It creates an ignored `.env` with a generated local database password and default loopback ports. It does not print the password or overwrite an existing file. [.env.example](../.env.example) documents the names with a placeholder, not usable credentials. The API rejects that placeholder. Do not commit `.env`. Public deployment requires the separate T16 HTTPS/configuration work.
 
-## Start the complete T04 foundation
+## Start the local application
 
 ```powershell
 docker compose up --build
@@ -36,7 +36,7 @@ Expected: `frontend`, `api`, `db` healthy; `migrate` exited **0** (successful on
 | [API liveness](http://127.0.0.1:8000/api/v1/health/live) | Process-only HTTP 200 independent of database availability |
 | [API readiness](http://127.0.0.1:8000/api/v1/health/ready) | Real PostgreSQL query, Alembic revision and migrated-table check; unavailable database returns sanitized 503 |
 
-PostgreSQL is private on the Compose network with no published host port. Change `FRONTEND_PORT`/`API_PORT` in ignored `.env` if needed; the frontend uses same-origin API paths and does not receive database credentials. Changing a password in `.env` does not rotate an already initialized PostgreSQL account; preserve the original configuration instead of deleting its data volume.
+PostgreSQL is private on the Compose network with no published host port. Change `FRONTEND_PORT`/`API_PORT` in ignored `.env` if needed; also update `APP_ORIGINS` to the exact frontend origin when changing its port. The frontend uses same-origin API paths and does not receive database credentials. Changing a password in `.env` does not rotate an already initialized PostgreSQL account; preserve the original configuration instead of deleting its data volume.
 
 ## Foundation tests and schema checks
 
@@ -44,14 +44,14 @@ PostgreSQL is private on the Compose network with no published host port. Change
 docker compose --profile test run --build --rm test
 ```
 
-Verified: **5 passed** (2 unit, 3 PostgreSQL integration), one upstream Starlette TestClient/httpx deprecation warning. This command runs migrations and both suites against `officeflow_test` on `test-db`, not the development database. That database uses tmpfs and has no host port. The runner refuses migration/test execution unless the database name ends in `_test`. These are foundation checks, not completed T12 product coverage or T05 CI.
+Current T07 CI: **49 passed** (10 unit, 39 PostgreSQL integration), with the upstream Starlette TestClient/httpx deprecation warning. This aggregate command runs migrations and both suites against `officeflow_test` on `test-db`, not the development database. That database uses tmpfs and has no host port. The runner refuses migration/test execution unless the database name ends in `_test`. These checks do not claim complete future T12 coverage.
 
 ```powershell
 docker compose exec -T api alembic current
 docker compose exec -T api alembic check
 ```
 
-Verified outputs: `0001_foundation (head)` and `No new upgrade operations detected.` No migration downgrade was executed.
+Current migration head is `0003_requests`; the isolated PostgreSQL `alembic check` reported `No new upgrade operations detected.` No migration downgrade was executed.
 
 ## Persistence after container restart
 
@@ -71,10 +71,12 @@ If using a nondefault frontend port, set `FRONTEND_URL` to its loopback URL in t
 npm.cmd --prefix frontend ci
 npm.cmd --prefix frontend run build
 $env:BROWSER_CHANNEL = 'msedge'
+# Set private DEMO_HANDLE and DEMO_PASSWORD process variables for a controlled account.
+# Never paste real credentials into repository files or public terminal transcripts.
 npm.cmd --prefix frontend run test:e2e
 ```
 
-The build command runs TypeScript checking and a Vite production build. The browser command was verified with the **already-installed Microsoft Edge**, headless: **2 passed**. No browser download was needed. Tests cover the UI → API → database write/read, page reload with the same record, and a simulated HTTP 503 error. A screenshot is written to ignored `artifacts/t04-foundation.png`; the reviewed example is also included in the verification record.
+The build command runs TypeScript checking and a Vite production build. T06 verified **3 authenticated browser tests** with installed Edge, covering login/logout, write/read/reload and a simulated 503. T07 separately verified **1 HTTP proxy security test**; it needs no demo credentials (`npm.cmd --prefix frontend run test:e2e -- --grep 'private operations'`). No browser download was needed. Screenshots/artifacts remain ignored; the historical T04 screenshot predates login.
 
 On another machine, install Node 24 if using these optional host checks and ensure the configured Playwright browser is actually installed. With no `BROWSER_CHANNEL`, Playwright expects its own Chromium installation; that alternative was not exercised here. Compose builds need neither host Node nor a host browser.
 
@@ -84,7 +86,7 @@ On another machine, install Node 24 if using these optional host checks and ensu
 
 If Docker reports permission/connection errors, check Docker Desktop is running in Linux-container mode and that the terminal has Docker access. The agent's sandbox denied daemon/cache access; retrying through the authorized host tool succeeded, so this was not a missing Docker installation. If a required tool is absent, install it through its official installer before attempting the command: [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/), [Python](https://www.python.org/downloads/), and optional [Node.js](https://nodejs.org/en/download). Run `docker version`, `docker compose version` and `python --version` afterward; no unavailable-tool test is counted as passed.
 
-For reproducible source verification and actual failures/fixes, see [t04-verification.md](t04-verification.md). No `.github/workflows` is added; stop at the T04 PR review.
+For historical clean-source verification and T04 failures/fixes, see [t04-verification.md](t04-verification.md). Current CI is in `.github/workflows/ci.yml`; T06/T07 evidence is recorded in their public issues.
 
 ## Continuous integration (T05)
 
