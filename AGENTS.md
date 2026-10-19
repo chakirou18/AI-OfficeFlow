@@ -2,7 +2,7 @@
 
 ## Current state and scope
 
-AI OfficeFlow is in the documentation phase. No application code, dependencies, tests, deployment, or executable commands exist. Do not describe planned capabilities as implemented. Current authorization covers documentation only; do not scaffold application code, install packages, initialize Git, publish, or deploy during this phase.
+AI OfficeFlow is in the documentation and project-governance phase. The Git repository and public GitHub issue tracker exist. No application code, dependencies, tests, or application deployment exist. Do not describe planned capabilities as implemented. Application development, dependency installation, and deployment require a subsequent authorized task; current work covers documentation and tracker setup.
 
 Read the working tree before changing it. Preserve unrelated user edits and existing files. Keep changes focused on the active task and its acceptance criteria. Use English for documentation, identifiers, and comments.
 
@@ -12,7 +12,7 @@ Read the working tree before changing it. Preserve unrelated user edits and exis
 - [Specification](docs/specification.md): lifecycle and measurable requirements.
 - [Architecture](docs/architecture.md): components, flows, reliability, open decisions.
 - [Plan](docs/plan.md): milestones and provisional assessment mapping.
-- [Backlog](docs/backlog.md): stable task identifiers and dependencies; future public tracker links.
+- [Backlog](docs/backlog.md): stable task identifiers, dependencies, exact public issue links, labels, and status workflow.
 - [Agent team](docs/agent-team.md): coding responsibilities and handoffs.
 - [Permissions](docs/permissions.md): secrets, customer data, approvals, operational boundaries.
 
@@ -27,7 +27,11 @@ Read only the additional context relevant to a task. Record significant architec
 - Inject provider/tool dependencies for deterministic tests. Do not make live model calls in default CI.
 - Add meaningful unit/integration tests with behavior changes; run applicable checks and report exact outcomes and blockers.
 - Use structured, redacted logs and correlated telemetry. Never place secrets or personal data in logs, issue text, screenshots, fixtures, or prompts used for public demonstrations.
-- Link work to a backlog/public issue. Keep documentation synchronized. Do not invent badges, test counts, coverage, or deployment links.
+- Before implementing a task, read and reference its relevant [GitHub Issue](https://github.com/chakirou18/AI-OfficeFlow/issues), acceptance criteria, dependencies, and latest comments. Find the stable T01–T18 mapping in [the backlog](docs/backlog.md). If no relevant issue exists, create or request one within the authorized scope before implementation; do not silently work without tracking.
+- Record progress and blockers against that issue as work proceeds. Keep exactly one status label according to the backlog workflow, and update the milestone when an agreed scope change requires it.
+- Link commits and PRs to the issue (for example, `Refs #2`). Record tests/checks with exact commands, outcomes and limitations; explicitly say when a check was not run. Link decisions/ADRs and completion artifacts in issue comments. Use synthetic or redacted evidence only.
+- Move work to review when evidence is available. Close as completed only after every acceptance criterion and completion dependency is satisfied and reviewed, with evidence linked. Partial progress remains open. Avoid automatic closing keywords while requirements remain unmet.
+- Keep documentation synchronized. Do not invent badges, test counts, coverage, or deployment links.
 - Default to small reviewable changes. Do not merge, publish, deploy, or send external messages without task authorization.
 
 ## Proposed directory boundaries

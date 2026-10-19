@@ -24,11 +24,11 @@ One developer or coding agent may perform several roles. This document does not 
 
 ## Collaboration workflow
 
-1. Select a public issue (or local backlog ID until the tracker exists); read its criteria, prerequisites, AGENTS.md and relevant domain documents.
+1. Select and reference the relevant [public issue](https://github.com/chakirou18/AI-OfficeFlow/issues) using the T01–T18 links in [the backlog](backlog.md); read its criteria, prerequisites, latest comments, AGENTS.md and relevant domain documents before implementing work.
 2. State the intended slice, ownership, interfaces, assumptions, and verification approach. Resolve requirements that affect permissions before implementing them.
 3. Make a focused change, update documentation, and verify behavior with suitable tests. Coordinate interface changes before dependent work proceeds.
-4. Handoff the changed files, exact checks and outcomes, known limitations, and evidence links. Do not claim unexecuted checks passed.
-5. Review against acceptance criteria and security boundaries. The integrator resolves conflicts and records final evidence; maintainers authorize merge/release according to the task.
+4. Handoff the changed files, exact checks and outcomes, known limitations, and evidence links. Record tests, commits/PRs, decisions/ADRs, and completion artifacts in the issue as work proceeds. Do not claim unexecuted checks passed.
+5. Review against acceptance criteria and security boundaries. Follow the backlog status-label workflow; unfinished work remains open. The integrator resolves conflicts and records final evidence; maintainers authorize merge/release according to the task. Close as completed only after all criteria and dependencies are satisfied and evidence reviewed.
 
 Public issues must show real progress and decisions throughout development. Never include secrets, private customer content, raw model prompts containing sensitive data, or internal access links in public handoffs.
 

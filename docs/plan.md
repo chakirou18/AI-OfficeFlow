@@ -1,6 +1,6 @@
 # Incremental implementation roadmap
 
-Status: planned. Documentation in this repository is the only current deliverable. Milestones are ordered by dependencies, not committed dates.
+Status: application implementation remains planned. Documentation, the public Git repository, and the [issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) are available. T01–T18 have phase milestones and are linked in [the backlog](backlog.md). This setup does not complete M0 or validate the official rubric. Milestones are ordered by dependencies, not committed dates.
 
 | Milestone | Scope | Exit evidence |
 | --- | --- | --- |
