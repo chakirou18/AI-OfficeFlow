@@ -1,5 +1,6 @@
-"""Private alert receipt only. No model, command runner or remediation capability."""
+"""Private validated receipts and automatic bounded on-call workflow dispatch."""
 from datetime import datetime, timezone
+from contextlib import contextmanager
 import hmac
 import os
 from pathlib import Path
@@ -7,7 +8,7 @@ import sqlite3
 import time
 from typing import Annotated, Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 MAX_BYTES, MAX_EVENTS, RETENTION_SECONDS = 65536, 500, 7 * 86400
@@ -69,8 +70,14 @@ class ReceiptStore:
                 received_at REAL NOT NULL, last_received_at REAL NOT NULL, deliveries INTEGER NOT NULL,
                 ends_at TEXT NOT NULL, PRIMARY KEY(fingerprint, starts_at, status))""")
 
+    @contextmanager
     def connect(self):
-        return sqlite3.connect(self.path, timeout=5)
+        connection = sqlite3.connect(self.path, timeout=5)
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
 
     def record(self, notification):
         stamp, inserted = time.time(), 0
@@ -102,11 +109,14 @@ class ReceiptStore:
             return [dict(row) for row in db.execute("SELECT * FROM receipts ORDER BY received_at DESC LIMIT ?", (MAX_EVENTS,))]
 
 
-def create_listener(*, token=None, path=None):
+def create_listener(*, token=None, path=None, agent=None):
     secret = token if token is not None else Path(os.environ["ALERT_TOKEN_FILE"]).read_text().strip()
     if len(secret) < 32:
         raise ValueError("A separate private alert credential is required")
     store = ReceiptStore(path or os.getenv("ALERT_STORE_PATH", "/data/receipts.sqlite3"))
+    if agent is None and os.getenv("ONCALL_OPS_TOKEN_FILE"):
+        from app.oncall_agent import AgentStore, OnCallAgent, PrivateTools
+        agent = OnCallAgent(AgentStore(store.path), PrivateTools(os.environ["ONCALL_OPS_TOKEN_FILE"]))
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
     def authorize(request):
@@ -119,8 +129,13 @@ def create_listener(*, token=None, path=None):
         authorize(request)
         return {"events": store.events()}
 
+    @app.get("/agent-runs")
+    def agent_runs(request: Request):
+        authorize(request)
+        return {"runs": agent.store.runs() if agent else []}
+
     @app.post("/webhook")
-    async def webhook(request: Request):
+    async def webhook(request: Request, background_tasks: BackgroundTasks):
         authorize(request)
         body = bytearray()
         async for chunk in request.stream():
@@ -133,6 +148,10 @@ def create_listener(*, token=None, path=None):
             # Never echo Pydantic errors: they contain untrusted input values.
             raise HTTPException(422, "Invalid alert notification") from None
         accepted = store.record(notification)
+        if agent:
+            for alert in notification.alerts:
+                if alert.status == "firing":
+                    background_tasks.add_task(agent.run, alert)
         return {"accepted": accepted, "duplicates": len(notification.alerts) - accepted}
 
     return app

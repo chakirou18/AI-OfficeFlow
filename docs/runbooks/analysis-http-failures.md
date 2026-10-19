@@ -18,7 +18,9 @@ It validates a <=64 KiB body with <=10 alerts and stores only fingerprint,
 timestamps, status and delivery count in its dedicated SQLite volume. Duplicate
 status deliveries do not create another event; late firing cannot undo resolution.
 Retention is 7 days/500 events, pruned transactionally on writes and reads.
-Restart preserves receipts. Nothing launches diagnosis, commands, models or repairs.
+Restart preserves receipts. T15 adds an automatically invoked bounded Python agent;
+see [its authorization and tool boundaries](../oncall-agent.md). With the exercise
+gate disabled (the default), no repair is authorized. No shell or model tools exist.
 
 1. Inspect Grafana at http://127.0.0.1:3000, dashboard `officeflow`: analysis
    attempts, failure ratio and alert state. Confirm actual 5xx impacts, traffic
@@ -26,8 +28,9 @@ Restart preserves receipts. Nothing launches diagnosis, commands, models or repa
 2. Use correlated metadata logs/traces to distinguish provider errors, timeouts,
    database availability and interrupted runs. Never copy request/model content,
    credentials or cookies into incident records. Keep any further diagnosis read-only.
-3. A maintainer chooses and performs any repair separately. T14 does not authorize
-   an autonomous repair agent or T15 exercise. Never delete database volumes.
+3. Outside an explicitly authorized T15 exercise, a maintainer chooses any repair
+   separately. Within that scope, only the known dev flag may be cleared once by
+   the bounded agent. Unknown causes stop safely. Never delete database volumes.
 4. Confirm successful authenticated analysis, persisted pending suggestions and
    zero automatic tasks. Observe ratio/traffic and the alert becoming inactive,
    then a resolved receipt. Silence alone or missing telemetry is not recovery.
@@ -36,7 +39,8 @@ If delivery is absent, inspect Prometheus rule evaluation and Alertmanager's
 private API/logs, then routing labels, Docker DNS, listener health, secret mounts
 and 403/422/413 responses. Do not print secrets or payloads. Collector/scrape
 failure needs separate monitoring; this rule only measures observed application
-HTTP results. The listener records receipts, not a durable work queue or diagnosis.
+HTTP results. The listener records receipts and bounded agent audit events, not a
+general work queue; a failed/interrupted repair is never resumed automatically.
 
 Opt-in verification: `python scripts/verify_alerting.py` uses only a newly created
 synthetic demo identity and one UUID-scoped request. It temporarily recreates the
@@ -44,7 +48,8 @@ local API with explicit development opt-in, a 240-second expiry and 40-failure
 budget, preserving sessions, PostgreSQL and telemetry. Auth/Origin/CSRF still apply.
 Its `finally` removes the override and recreates the API, then verifies a genuine
 successful pending proposal and subsequent resolved notification. Do not use this
-local-only mechanism in deployment. No fault-control HTTP endpoint exists.
+local-only mechanism in deployment. T14 uses no fault-control HTTP endpoint; the
+separate T15 exercise requires its maintainer-only private authorization API.
 
 Setup: `python scripts/configure_observability.py`, then
 `docker compose up -d --build --wait`. Rule tests:

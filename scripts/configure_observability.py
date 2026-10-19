@@ -11,6 +11,11 @@ def main():
         raise SystemExit("Run python scripts/configure_local.py first")
     directory = ROOT / "artifacts"
     directory.mkdir(exist_ok=True)
+    for name in ("exercise-admin-token", "oncall-ops-token"):
+        target = directory / name
+        if not target.exists():
+            target.write_text(secrets.token_urlsafe(32), encoding="utf-8")
+            target.chmod(0o600)
     alert_token = directory / "alert-webhook-token"
     if not alert_token.exists():
         alert_token.write_text(secrets.token_urlsafe(32), encoding="utf-8")
