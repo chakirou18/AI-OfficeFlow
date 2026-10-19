@@ -16,6 +16,13 @@ def test_telemetry_is_disabled_by_default_and_remote_export_is_denied(monkeypatc
         configured_telemetry()
 
 
+def test_telemetry_environment_is_bounded_and_cannot_include_private_labels(monkeypatch):
+    monkeypatch.setenv("TELEMETRY_ENABLED", "true")
+    monkeypatch.setenv("TELEMETRY_ENVIRONMENT", "private-user-request-id")
+    with pytest.raises(ValueError, match="Unknown telemetry environment"):
+        configured_telemetry()
+
+
 def test_unknown_urls_and_headers_never_become_telemetry_and_context_is_correlated(observed_telemetry):
     observer, spans, reader, logs = observed_telemetry
     secret = "synthetic-private-sentinel"

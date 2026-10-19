@@ -90,7 +90,10 @@ def configured_telemetry():
             or parsed.port != 4318 or parsed.username or parsed.password or parsed.path or parsed.query or parsed.fragment):
         raise ValueError("Telemetry endpoint must be a private local Collector")
     # Explicit resource avoids environment detectors/OTEL_RESOURCE_ATTRIBUTES leaks.
-    resource = Resource({"service.name": "officeflow-api", "deployment.environment": "local"})
+    environment = os.getenv("TELEMETRY_ENVIRONMENT", "local")
+    if environment not in {"local", "development", "production"}:
+        raise ValueError("Unknown telemetry environment")
+    resource = Resource({"service.name": "officeflow-api", "deployment.environment": environment})
     session = requests.Session()
     session.trust_env = False
     traces = TracerProvider(resource=resource)

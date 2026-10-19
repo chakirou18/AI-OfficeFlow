@@ -54,6 +54,8 @@ jobs:
         run: ruff check --select E9,F . ../scripts
       - name: Unit tests
         run: python -m pytest tests/unit -v
+      - name: Deployment safety tests (no deploy credentials)
+        run: python -m unittest discover -s ../scripts/tests -v
       - name: Prometheus alert rule tests
         run: docker run --rm --entrypoint promtool -v "${{ github.workspace }}/infra/observability:/rules:ro" -w /rules prom/prometheus:v3.2.1 test rules analysis-alerts.test.yaml
       - name: Apply migrations to isolated PostgreSQL
