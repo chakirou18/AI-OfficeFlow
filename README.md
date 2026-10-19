@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T01-T09 merged; T10 integration under verification.** The authenticated workspace supports requests, dashboard, persisted bounded analysis and read-only MCP. T10 adds an optional local Ollama adapter and analysis UI while preserving simulated defaults. Local checks pass; real model output currently fails validation, so T10 remains open. See [T10 evidence](docs/t10-verification.md). Human approval (T11), deployment and telemetry remain later tasks; no grading points are claimed.
+**Status: T01-T09 merged; T10 real CPU inference verified.** The authenticated workspace supports requests, dashboard, persisted bounded analysis and read-only MCP. T10 adds an optional local Ollama adapter and analysis UI while preserving simulated defaults. Local checks and three real CPU-only evaluations pass. See [T10 evidence](docs/t10-verification.md) and Issue #10 for the merge gate. Human approval (T11), deployment and telemetry remain later tasks; no grading points are claimed.
 
 ## Run the foundation locally
 

@@ -299,7 +299,7 @@ and [Python asyncio timeout](https://docs.python.org/3.12/library/asyncio-task.h
 Exact results/CI evidence are recorded in Issue #9; T17 still owns the remaining
 Extension Pack demonstrations.
 
-## Local Ollama analysis (T10, real output currently blocked)
+## Local Ollama analysis (T10)
 
 The existing installed model is `llama3.2:3b`; startup never downloads it.
 Default `MODEL_MODE=simulated` remains deterministic and is explicitly shown in the
@@ -361,8 +361,9 @@ stops on the first failure, writes the explicit synthetic evaluation artifact an
 returns nonzero; it never labels mocked output as real. Preserve failed evidence
 under a distinct filename before an explicitly authorized rerun.
 
-Current [T10 evidence](t10-verification.md): first real call failed output validation
-after 12.483 seconds; no successful real proposal or timeout is claimed. T10 remains
-open/unmerged pending that runtime gate. No model upgrade/download or provider
+Current [T10 evidence](t10-verification.md): CPU-only execution (`num_gpu:0`) avoids
+the observed Vulkan decoding failure. Three real proposals passed strict validation
+and persisted pending within 30 seconds, with zero active tasks created. The initial
+failed evaluation is retained as historical evidence. No model upgrade/download or provider
 fallback was performed. API reference: [Ollama generate](https://docs.ollama.com/api/generate)
 and [structured outputs](https://docs.ollama.com/capabilities/structured-outputs).
