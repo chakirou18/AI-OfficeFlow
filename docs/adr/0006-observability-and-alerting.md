@@ -1,5 +1,7 @@
 # ADR 0006 — Correlated local telemetry and bounded alert response
 
+> SUPERSEDED by [ADR 0010](0010-minimal-zoomcamp-scope.md). Historical design only: company references and prior requirements/statuses below are not current scope. Retained for rationale and Git/issue evidence; use the current specification and ADR 0010 for implementation.
+
 Status: **Accepted for prototype design** for local telemetry and response boundaries. **Proposed / approval required** for external notifications, retention outside the prototype and an actual fault-injection exercise. Owner: T03; implementation: T13–T15.
 
 ## Decision and signal paths

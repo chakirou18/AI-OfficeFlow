@@ -1,5 +1,7 @@
 # ADR 0003 — Controlled sessions, roles and human approval
 
+> SUPERSEDED by [ADR 0010](0010-minimal-zoomcamp-scope.md). Historical design only: company references and prior requirements/statuses below are not current scope. Retained for rationale and Git/issue evidence; use the current specification and ADR 0010 for implementation.
+
 Status: **Accepted for prototype design**. Owner: T03; implementation: T06, T11, T12. Actual company access policies remain provisional A03.
 
 ## Decision

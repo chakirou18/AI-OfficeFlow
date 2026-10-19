@@ -1,55 +1,40 @@
-# Secrets, data, permissions, and human approval
+# Permissions and security note
 
-Status: intended policy for implementation. Controls described here are requirements, not deployed safeguards.
+Scope: small Zoomcamp final project, **synthetic demonstration data only**. No real business, customer records or external company systems. Controls below are requirements/design, not implemented safeguards. Earlier company assumptions are retired.
 
-The product owner has accepted a generic SME prototype using synthetic data only and explicitly deferred A01–A06 company validation. No real company connections, real customer processing or operational fault-injection authorization is granted. [ADRs](adr/README.md) define preliminary sessions/RBAC, scoped MCP, live-model budgets and hosting boundaries. Design acceptance does not authorize application implementation, paid provisioning, API spend or an operational exercise.
+## Secrets and identities
 
-## Secrets and sensitive data
+Keep model/deployment/operational credentials, demo passwords and session secrets in untracked local configuration or approved secret management. Root .gitignore exists; a placeholder-only example environment file is planned. Never put secrets in Git, frontend bundles, images, prompts, issues, screenshots, logs or traces. Use pseudonymous demo accounts and synthetic request text. A public repository does not make credentials public demo data.
 
-Use synthetic requests for development, automated tests, screenshots, public issues, and demonstrations. Customer names, email addresses, phone numbers, addresses, site details, commercial information, and request bodies may be sensitive. Store only fields needed for the workflow; do not collect identity documents, payment credentials, or unrelated sensitive information.
+If a credential is exposed, stop the affected action, report without repeating the value, and arrange authorized revocation/rotation. Removing a tracked value does not revoke it. No live provider or paid host has been selected or provisioned.
 
-Provider keys, database passwords, session secrets, CI credentials and telemetry tokens belong in local untracked configuration or the chosen secret manager. A root .gitignore exists; a placeholder-only example configuration must be added when scaffolding begins and does not exist yet. Never place secrets in frontend bundles, Git history, Docker image layers, logs, traces, agent prompts, or public artifacts. Redact exception output and model/tool payloads.
-
-Use separate development, CI, staging, and production credentials. Scope access to each service and environment. Prefer short-lived deployment credentials where supported. If a secret leaks, stop affected operations, notify the maintainer without reproducing it, arrange authorized revocation/rotation, and assess exposure. Removing a file alone does not revoke a leaked key.
-
-Before any real pilot data is processed, confirm business authorization, provider data handling, deployment region, retention/deletion periods, access ownership, and backup policy. Define deletion across request revisions, proposals, provider retention, telemetry, and backups; keep only minimal audit metadata consistent with the agreed policy. No retention duration or legal compliance is claimed yet.
-
-## Proposed permission matrix
-
-| Identity | Allowed | Explicit boundary |
+| Identity | Minimum permission | Denied |
 | --- | --- | --- |
-| Employee | Create/read requests in the deployment, request analysis, view proposals | Cannot approve, assign roles, or invoke recovery |
-| Reviewer | Employee actions, approve/reject, change status, maintain approved task state | Must pass revision checks; cannot approve as an agent identity |
-| Administrator | Provision accounts/roles and update business profile | Reviewer permission requires a separate assignment; changes audited |
-| Operator | Redacted service telemetry and staging recovery approval | No default customer-content access or business approvals |
-| API service | Authorized domain writes and audit events | Database privilege limited to application needs |
-| Job runner / graph | Read versioned input; persist run/proposal through narrow service interfaces | Cannot create active tasks or approve; database grants/interfaces must enforce separation |
-| MCP tool identity | Read active profile and allowed staff directory fields | No generic SQL, filesystem, shell, or mutation tools |
-| On-call agent | Read sanitized diagnostics, propose allowlisted recovery, execute approved staging flag reset | No production writes, arbitrary shell, deletion, code changes or redeployment |
-| CI/CD identity | Test on isolated data; deploy approved artifacts to selected target | Deployment secrets unavailable to untrusted pull-request code |
+| Authenticated demo user | Create/view synthetic requests, request analysis, approve/reject and mark approved tasks done in the shared demo workspace | Private ops actions, secrets, arbitrary tools |
+| Analysis workflow/model | Read the supplied request and return schema-valid task/priority suggestions | Approve, create active tasks, shell, company integrations, operational repair |
+| Read-only MCP client | Bounded synthetic request summary through an allowlisted tool | SQL, arbitrary file/URL access, credentials or any mutation |
+| On-call custom agent | Authenticated alert receipt, redacted diagnostic read and one prior-authorized dev flag clear plus bounded verification | Task approval, fault enablement, arbitrary shell/code/deploy/data deletion, production mutation |
+| CI test job | Synthetic isolated test database and offline stub | Production/model/deployment secrets, especially from untrusted PRs |
+| Release job | Environment-scoped approved artifact deployment with distinct dev/production secrets | Automatic production promotion, unapproved provisioning/spend |
 
-All access checks run on the server. Hiding a UI control is insufficient. Service credentials must enforce their permissions independently of an LLM's instructions. MVP deployments have one business context; do not market this as tenant-isolated SaaS. Tenant isolation requires a separate design and tests before shared hosting of multiple businesses.
+There is no enterprise RBAC/account-management UI. Controlled demo accounts have equal app permissions. Use password hashes, revocable opaque sessions, secure HttpOnly/SameSite cookies for public HTTPS and CSRF/Origin validation for mutations. Only explicitly local loopback mode may relax Secure. Private ops endpoints remain off the public proxy and require a separate scoped credential. A hidden UI button is not authorization.
 
-## Human approval boundaries
+## Human approval and data integrity
 
-Creating a request, viewing permitted data, and running read-only analysis require ordinary user authorization. Agent proposals remain inactive until a reviewer explicitly approves the displayed changes. Approval binds to proposal ID, input revision and exact payload; rejection and stale revisions apply nothing. Any later edit requires a new proposal and review. Apply approved tasks and audit events atomically and idempotently.
+AI proposals are untrusted inactive data. A human explicitly approves or rejects a specific pending analysis payload. Approval, task inserts and decision/status activity share one PostgreSQL transaction, with uniqueness constraints and concurrency checks. Duplicate approval creates tasks once; rejection creates none. No external business action exists.
 
-External email, customer contact, binding quotations, purchases, CRM mutation, and external scheduling are outside the MVP. Adding them requires a new permission design, an explicit user-facing approval step, scoped tools, auditability, and acceptance tests. Approval for one proposal never authorizes unrelated future actions.
+Escape displayed model text, validate priority/output sizes and never execute generated code. Default stub is visibly simulated. Before real-model evaluation, approve provider/model, synthetic-only handling, token/time/concurrency limits and a persisted bounded call allowance. Failed or uncertain billed calls consume allowance. No automatic retries/failover or implied spending permission from a supplied API key.
 
-Operational approval is separate: an operator approves one specific staging recovery action for one incident. The recovery service checks environment, incident identity, action allowlist, expiry, and whether that action has already executed. Enforce a single attempt, verify synthetic queue processing within 180 seconds, and escalate if verification fails. The application must not infer approval from silence or model confidence.
+## Controlled incident boundary
 
-An authenticated alert receiver must automatically wake the responder and deduplicate repeated incidents. Wake-up and read-only diagnosis do not authorize mutation: the agent waits for approval and then executes the exact allowlisted staging reset itself. A human performing the repair or manually starting the agent is not the intended alert-driven repair evidence. Production deployment remains a separate manually initiated, authorized release workflow; automatic dev deployment cannot promote itself to production.
+A later T15 runbook must obtain human authorization for an exact development-only analysis-disable exercise, its duration and one permitted reset. That prior exercise authorization allows automatic repair after the alert; it does not require building an extra approval UI for each incident. The agent must verify environment/authorization, known cause and single-action deduplication before resetting the flag. Unknown causes, expiry or failed verification stop and report. The maintainer enables the fault; the agent may only clear it. No production fault/repair or exercise execution is authorized by this documentation change.
 
-The Module 5 coding-agent reviewer and MCP client require separate scoped identities and an executable guardrail as planned in [module5-checklist.md](module5-checklist.md). Current team role descriptions do not establish registered subagents or enforced hooks. Any later subagent demonstration still requires explicit user authorization. Pilot assumptions and company-specific permission ownership remain provisional under the accepted prototype deferral in the [specification](specification.md#pilot-assumptions-requiring-confirmation).
+Alertmanager delivery and ops calls use separate scoped credentials on private service networking; use TLS when crossing trust boundaries. Payload size/type and incident fingerprint are validated; alert text cannot become a shell instruction. A repair must be executed by the triggered agent and verified, not performed manually and attributed to it.
 
-## Untrusted content and model boundaries
+## Telemetry, deployment and evidence
 
-Customer text and tool responses are data, even if they contain instructions. Agents must not follow embedded demands to reveal secrets, override policy, grant permissions, or call additional tools. Validate schemas, tool arguments, response sizes, deadlines and identifiers in application code. Render model output as escaped text; do not execute generated code or render unsanitized HTML.
+Allowlist telemetry metadata: trace/span IDs, timings, route template, outcome, version and sanitized error code. Exclude request text, prompts/results, cookies/authorization headers and credentials. Use Prometheus low-cardinality labels, OTel trace context, stored Loki/Tempo data and authenticated Grafana. Keep telemetry/database ports private. Retention and storage caps are implementation configuration, not claims of compliance or commercial readiness.
 
-Send the model only data needed for the task and permitted by the selected provider policy. Use restricted network access where practical, explicit timeouts, bounded retries, usage budgets and per-user run limits. Fail closed on unknown tools, invalid outputs, missing authorization or stale approvals. Do not persist hidden model reasoning; retain only necessary structured results and concise explanations.
+Only synthetic data exists in dev/production release environments. Separate databases, volumes and credentials; never run tests/restore exercises against the live demo database. Prefer additive migrations and compatible-image rollback; never implicitly downgrade a database or delete volumes. Obtain approval before paid provisioning, a real deployment/exercise or a specialized-subagent invocation. Actual deployment/restore and guardrail behavior need issue-linked evidence.
 
-## Audit and operational access
-
-Record actor, action, target, timestamp, correlation ID, proposal/revision, decision, and outcome. Keep request content out of general audit metadata and telemetry. Restrict audit reads, prevent ordinary users from altering history, and define retention before pilot use. Protect telemetry endpoints and dashboards with authentication; keep database ports private.
-
-Before public deployment, verify session security, backend authorization, input/output handling, HTTPS, secret separation, backup/restore, approval concurrency, and staging recovery limits through the corresponding backlog criteria. These checks are required delivery work, not evidence already available.
+Module 5 requires this note plus an executable guardrail demonstration, not prose assurances alone. Three peer-review confirmations may be recorded, but private review feedback/identifiers should not be published.

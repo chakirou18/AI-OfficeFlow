@@ -1,5 +1,7 @@
 # ADR 0007 — Release environments, hosting options and rollback
 
+> SUPERSEDED by [ADR 0010](0010-minimal-zoomcamp-scope.md). Historical design only: company references and prior requirements/statuses below are not current scope. Retained for rationale and Git/issue evidence; use the current specification and ADR 0010 for implementation.
+
 Status: **Accepted for prototype design** for local Compose and release flow. **Proposed / product-owner approval required** for public hosting/vendor/region, domains, recurring spend and external credentials. Owner: T03; implementation: T05, T16, T18.
 
 ## Local and release decisions

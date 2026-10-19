@@ -1,5 +1,7 @@
 # ADR 0002 — PostgreSQL source of truth and durable jobs
 
+> SUPERSEDED by [ADR 0010](0010-minimal-zoomcamp-scope.md). Historical design only: company references and prior requirements/statuses below are not current scope. Retained for rationale and Git/issue evidence; use the current specification and ADR 0010 for implementation.
+
 Status: **Accepted for prototype design**. Owner: T03; implementation: T04, T07, T09, T11, T12.
 
 ## Decision and principal entities

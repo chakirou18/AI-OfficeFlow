@@ -1,50 +1,40 @@
-# Incremental implementation roadmap
+# Incremental final-project roadmap
 
-Status: application implementation remains planned. T01/T02 are complete as requirements review and tracker setup for the accepted generic synthetic-only prototype. A01–A06 remain provisional; no company validation is implied. T03 now has nine [ADRs](adr/README.md) and a detailed [architecture](architecture.md); live provider/model/budget and public-hosting selection remain open, so M0 is not fully complete. Milestones are ordered by dependencies, not committed dates.
+Target: all 12 official criteria / 24 available points, all seven Module 5 items and three peer reviews. No points or runtime completion are claimed. Scope and decisions are in [specification.md](specification.md) and [ADR 0010](adr/0010-minimal-zoomcamp-scope.md).
 
-| Milestone | Scope | Exit evidence |
+## Recovery and current position
+
+Before the interrupted verification, commits `0753300` and `4d21e6f` were pushed successfully; T01/T02 were closed with evidence and T03 remained in review. This session verified local/remote main matched `4d21e6fb89ecd8cad8a8b7b746f64b01e12a4fbd` and the working tree was clean before editing. The promised final T03 verification comment was absent; its existing design comment and nine ADRs were already present and were not recreated.
+
+The current scope supersedes the commercial/pilot direction. A01-A06 are retired. Earlier ADRs and issue evidence remain historical; only the small generic educational app is current. T01/T02 acceptance evidence remains useful and is reassessed without reopening completed work unnecessarily. T03 is a design task, not model/hosting procurement.
+
+## Milestones and evidence gates
+
+| Existing phase | Tasks and smallest useful increment | Exit evidence |
 | --- | --- | --- |
-| M0 — Requirements and project governance | Validate pilot assumptions, official rubric and Module 5 material; publish repository and tracker; refine acceptance criteria | Rubric links and mapping, prioritized issues, stakeholder assumptions, first ADRs |
-| M1 — Runnable foundation | React, FastAPI, PostgreSQL, migrations, identity/roles, Compose, CI skeleton | Clean-checkout startup, protected endpoint checks, passing CI link |
-| M2 — Request workflow | Create/list/detail, revisions, status rules, audit trail, minimal dashboard | Database integration tests and browser demonstration using synthetic data |
-| M3 — Agent proposals | Durable jobs, provider adapter, Sales and Coordination graph, read-only MCP tools, fixture evaluation | Reproducible graph evaluation, failure/retry tests, persisted proposals |
-| M4 — Human review | Review screens, atomic approval/rejection, stale-result protection and duplicate prevention; unified unit/integration runner | Browser flow and permission/concurrency integration tests; both suites pass with one command |
-| M5 — Operational visibility | Structured logs, OpenTelemetry, metrics, signal collection/storage/UI, queue-age alert and runbook | Shared trace-ID correlation including async work, redaction checks, controlled alert delivery evidence |
-| M6 — Safe on-call demonstration | Staging fault flag, automatic alert-triggered agent wake-up, diagnosis, operator approval and agent-executed repair | Incident report showing automatic invocation, allowlisted reset, verified recovery, audit trail and recording |
-| M7 — Extension Pack and hardening | Implement all seven Module 5 items: instructions, workflow, specialized subagent, MCP, guardrail, package or custom agent, permission note | Each artifact demonstrated, including scoped coding-agent use; tests, permission review and human-reviewed diff |
-| M8 — Public delivery and assessment | Public HTTPS staging/dev, automatic tested dev deployment, manually initiated production promotion, backup/restore and rollback rehearsal, final evidence and peer reviews | Working access instructions, both release-path runs, demo/evidence index and three course-platform peer-review confirmations |
+| M0 — Requirements/governance | T01-T03: generic scope, public tracker, rubric/Extension Pack mapping and minimal ADR | Source links, current criteria, design review and issue-linked commits; no company validation gate |
+| M1 — Foundation | T04: React/FastAPI/PostgreSQL, migrations, health and first database round trip. T05: early PR CI. T06: demo session/access protection | Core one-command startup, real database check, meaningful initial tests/CI and authentication evidence |
+| M2 — Request/task UI | T07-T08: immutable requests, lists/detail, task states and dashboard | Browser create/refresh/task flow backed by PostgreSQL |
+| M3 — Analysis | T09: bounded synchronous adapter and small read-only MCP tool. T10: task/priority analysis | Deterministic fixtures, timeout/error evidence, simulated-mode labeling and one authorized real-model evaluation |
+| M4 — Approval/tests | T11-T12: atomic approve/reject and aggregate test runner | Duplicate/concurrent approval check, rejection-with-no-tasks, browser smoke and one-command unit/integration pass |
+| M5 — Telemetry/alert | T13-T14: stored OTel metrics/logs/traces in Grafana and user-impact analysis-error alert | Shared trace context, UI drill-down, redaction and actual authenticated alert delivery |
+| M6 — On-call repair | T15: prior-authorized dev-only analysis-flag incident, automatic agent diagnosis/fix/verification | Recorded alert wake-up and agent-executed repair; unknown cause fails closed |
+| M7 — Extension Pack | T17: instructions, reusable workflow, specialized subagent, MCP, guardrail, custom agent, permissions note | All seven artifacts invoked/demonstrated, including the explicit custom-agent branch; runtime binding and subagent authorization verified |
+| M8 — Delivery/evidence | T16: actual deployment, automatic dev/manual production, compatible-image rollback and small restore check. T18: final rubric evidence and peer reviews | Public URL or clear actual-deployment demo, pipeline runs, final clean-checkout guide and three peer-review confirmations |
 
-Add inexpensive CI checks early, then expand them with each feature. Deploy a minimal staging slice once M1–M2 are stable if the chosen host permits; M8 is the final delivery gate. Operational demonstrations require M4 approval boundaries and M5 telemetry first. Extension work may be brought forward when required by official material, without bypassing those controls.
+Add checks with each feature; T12 consolidates them rather than postponing testing. Preserve dependencies in the [backlog](backlog.md): T04 follows T03, T05 follows T02/T04, T06 follows T04/T05, requests precede analysis, approval precedes final coverage, T13 may start after T09, and T16 needs T03/T12/T13. T17 requires T01/T10/T11 and now T15 for its selected custom-agent demonstration; all original edges remain. Phases group work without adding unnecessary dependencies or a second tracker.
 
-## Official assessment and Extension Pack gates
+## Official assessment
 
-The [grading checklist](grading-checklist.md) is the detailed evidence map, using the official 12 criteria / 24-point rubric verified at pinned course commit `de41e4096d8ac08db3852dfda4ce802f9ac0c0d2`. It replaces the kickoff provisional grouping and records actual evidence status. No full-score claim is made.
+The [grading checklist](grading-checklist.md) is the exact twelve-criterion evidence map with maxima. Product Specification includes written criteria plus public tracker use; coding-agent responsibilities/context are documented separately from application agents. Application/Containerization need frontend/backend/persistence and complete one-command Compose startup. Testing needs both unit/integration suites passing with one command. CI/CD needs PR tests, automatic dev deployment and manual production deployment. Observability needs stored, UI-visible metrics/traces/structured logs sharing trace context. Alerting and actual alert-triggered repair are separate demonstrations.
 
-| Official criterion (maximum) | Planned evidence | Milestone / backlog |
-| --- | --- | --- |
-| 1. Problem Description (2) | README explains problem, functionality and expected behavior | M0 / T01, T18 |
-| 2. Product Specification (2) | Written specification plus public tasks with acceptance criteria and coding-agent use evidence | M0 onward / T01, T02 |
-| 3. Agent Team Specification (2) | Coding roles, handoffs, and business-agent distinction | M0 / T01, T17 |
-| 4. Context Management (2) | AGENTS.md, linked modular documents, later ADRs | All / T01, T03, T17 |
-| 5. Application (2) | Connected frontend/backend/persistent database and one-command local startup | M2–M4 / T04–T11 |
-| 6. Testing (2) | Unit and integration suites pass with one command; CI evidence | All implementation / T05, T12 |
-| 7. Containerization (2) | One-command complete Compose startup including database | M1 / T04 |
-| 8. Deployment (2) | Public URL or clear deployment demo; project retains HTTPS staging target | M8 / T16 |
-| 9. CI/CD (3) | PR tests, automatic dev deployment, manual production deployment and rollback | M1, M8 / T05, T16 |
-| 10. Observability (2) | Metrics/traces/structured logs share trace context, collected/stored and visible in UI without sensitive content | M5 / T13 |
-| 11. Alerting on User Impact (1) | Working queue-age alert, delivery exercise and runbook | M5 / T14 |
-| 12. On-Call Agent (2) | Alert wakes agent; operator-approved staging repair is executed by agent and verified | M6 / T15 |
+The [Module 5 checklist](module5-checklist.md) retains all seven requirements; there is no separate graded homework. Three peer reviews are mandatory, independently of score. The course platform controls assignments/deadlines; none is assumed complete.
 
-The [Module 5 checklist](module5-checklist.md) maps all seven required Extension Pack capabilities to proposed artifacts, tasks and demo steps. Module 5 has no separately graded homework. Existing AGENTS.md and permissions.md provide two document artifacts; the full demonstration and other runtime artifacts remain unimplemented. T17 must not be closed on the basis of proposals alone.
+## Decisions deliberately delayed to their delivery task
 
-**Three peer reviews are mandatory to pass**, independently of points. T18 owns completion evidence for three distinct course-assigned reviews; dates/assignments must be checked on the course platform. Do not publish private feedback or claim completion before submission is confirmed.
+- T10: select a real provider/model and bounded usage plan before a live evaluation. No live spend or key is needed for T04 or default CI.
+- T16: select existing/approved host, account, region and TLS/access setup; obtain approval before any paid provisioning. A clear actual deployment demo is an allowed fallback to a public URL. Both automatic dev and manual production paths still need evidence.
+- T15: authorize the exact dev incident and narrow repair before execution. No operational exercise runs during design.
+- T17: bind portable subagent/workflow definitions to a supported tool and obtain explicit subagent-invocation authorization. The custom on-call agent is the selected custom-agent artifact, not a claim of a supported plugin manifest.
 
-The product owner has accepted the [synthetic-only generic prototype boundary](specification.md#pilot-assumptions-requiring-confirmation), explicitly deferring all A01–A06 stakeholder validation. This satisfies the T01 pilot-review gate without claiming Entropie approval. Record T01 completion before reviewing T02. T03 design proceeds under that boundary; real customer data and operational fault-injection authorization remain deferred.
-
-## Delivery discipline
-
-The local design baseline is React/TypeScript/Vite, FastAPI, PostgreSQL, a separate leased-job worker, bounded LangGraph, read-only MCP, server-side sessions/RBAC and transactional approvals. Stub model mode avoids external credentials/spend. OTel Collector/Prometheus/Loki/Tempo/Grafana and Alertmanager are designed for a later observability profile. See ADRs 0001–0009 for alternatives and consequences.
-
-Next gate: review T03's preliminary choices and approve a live provider/model/budget plus a public-hosting approach before final service selection or provisioning. T03 remains open. T04's local offline scaffold is the recommended next implementation slice after explicit implementation authorization; independent preparation may start without paid services, but its existing T03 completion dependency remains. Build PR CI early in T05, then T06 access, T07/T08 requests/UI, T09/T10 graph/tools, T11/T12 approval/tests, T13/T14 telemetry/alerts and T15 recovery only after separate A06 exercise authorization. T16 retains automatic dev/manual production and rollback gates; T17/T18 retain seven extension demonstrations and three peer reviews. Do not infer authorization to implement from this design roadmap.
-
-Move one demonstrable vertical slice through implementation, tests, documentation, and review before expanding scope. Use deterministic provider stubs in CI and separate opt-in live model evaluations. Attach actual evidence to public issues, use synthetic data in screenshots, and record known gaps honestly. A milestone is complete only after its exit evidence exists.
+**Recommended next implementation: T04**, the local frontend/API/PostgreSQL skeleton. Keep it small and verify the database round trip before adding analysis, telemetry or operational logic. This documentation revision does not implement that task or authorize installing/provisioning anything now.
