@@ -1,6 +1,6 @@
 # T10 local Ollama integration and evaluation
 
-Status: implementation verified locally; **real proposal generation blocked**.
+Status: **real proposal generation verified with CPU-only execution**; PR checks pending for the correction.
 Issue: [T10 #10](https://github.com/chakirou18/AI-OfficeFlow/issues/10).
 T09 dependency is merged through PR #24, main `3903d68`.
 This records observed results, not awarded grading points or T11 approval.
@@ -80,10 +80,42 @@ existing offline fixtures remain. PostgreSQL tests additionally verify real adap
 error mapping, no task creation, persisted metadata, replay, call allowance and
 global reservation. These automated tests make no model calls.
 
-## Completion gate
+## Focused diagnosis and successful correction, 2026-10-19
 
-Leave T10 open and its PR unmerged until an explicitly rerun real evaluation
-returns a schema-valid pending proposal within 30 seconds. Investigate the local
-Ollama/model decoding failure before changing runtime/model installation; no upgrade,
-download, weaker schema, longer deadline or fabricated success is authorized here.
-CI results and PR/commit links are recorded in Issue #10. T11 is next only after T10.
+The same minimal host prompt returned repeated digits with the default Vulkan
+runner (5.938 s, `done:true`, `done_reason:length`), but exactly `Hello` with
+`num_gpu=0` (4.109 s, `done:true`, `done_reason:stop`). Runtime device diagnostics
+identify the default runner as Vulkan on Radeon RX 5500M, offloading 28/29 layers;
+CPU-only `/api/ps` reports zero VRAM. The identical CPU prompt also terminated
+normally from Docker. This isolates the observed failure to the GPU execution path,
+not host connectivity or the adapter's JSON validation. The underlying GPU/driver
+defect is not diagnosed further; no upgrade, installation or model download is needed.
+
+The smallest correction adds `num_gpu:0` to the existing bounded provider options;
+`ollama-v2` identifies that configuration. Schema, temperature, seed, context/output
+caps, call allowance, deadline and approval boundary are unchanged. A direct Docker
+CPU schema check produced five validated tasks in 12.358 s, `done:true/stop`.
+The subsequent production workflow evaluation in the separate synthetic test
+database produced:
+
+| Synthetic fixture ID | Time | HTTP/state | Validated tasks | Active tasks created |
+| --- | --- | --- | --- | --- |
+| simple | 10.855 s | 201 / pending | 5 | 0 |
+| ambiguous | 7.059 s | 201 / pending | 3 | 0 |
+| injection | 3.238 s | 201 / pending | 1 | 0 |
+
+Each proposal was re-read from an independent PostgreSQL session and compared
+with the authenticated API response. Artifact: ignored
+`artifacts/t10-real-cpu-evaluation.json`; model/version/digest remain as recorded
+above. The earlier failed report is preserved. Four focused diagnostic calls
+(host default/CPU, Docker CPU minimal/schema) preceded these three workflow calls.
+Affected adapter unit/PostgreSQL tests: **33 passed** in 6.11 s; pinned Ruff passed.
+The existing 113-test and 12-browser baseline is retained; required CI will run
+the full backend suite for the correction. No full local suite was redundantly rerun.
+
+## Completion gate (initial blocker resolved)
+
+The real schema-valid pending-proposal gate now passes within 30 seconds. Merge/close
+only after required CI passes on the corrected commit and the issue evidence is
+updated. CI results and PR/commit links are recorded in Issue #10. T11 is authorized
+only after T10 is fully completed and merged. No later task starts before that gate.

@@ -42,7 +42,7 @@ def test_real_adapter_persistence_and_no_task_mutation(auth_context, case):
     key = uuid4()
     run = asyncio.run(execute_analysis(engine, adapter, request_id, user_id, key, timeout_seconds=0.1))
     assert run.provider_mode == "ollama" and run.provider_model == "llama3.2:3b"
-    assert run.prompt_version == "ollama-v1"
+    assert run.prompt_version == "ollama-v2"
     assert run.state == ("pending" if case == "valid" else "failed")
     assert run.error_code == (None if case == "valid" else case)
     assert asyncio.run(execute_analysis(engine, adapter, request_id, user_id, key)).id == run.id

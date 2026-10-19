@@ -50,7 +50,7 @@ def main():
     report = {"evaluated_at": datetime.now(timezone.utc).isoformat(), "real_inference": True,
               "provider": "Ollama", "server_version": version, "model": adapter.provider_model,
               "model_digest": installed["digest"], "fixture_source": "backend/tests/fixtures/ollama_evaluations.json",
-              "limits": {"deadline_seconds": 30, "num_ctx": 4096, "num_predict": 512,
+              "limits": {"deadline_seconds": 30, "num_ctx": 4096, "num_predict": 512, "num_gpu": 0,
                          "max_response_bytes": 32768, "max_calls": 20, "concurrency": 1,
                          "automatic_retry": False, "fallback": False}, "results": []}
     application = create_app(engine)

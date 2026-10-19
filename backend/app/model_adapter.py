@@ -55,7 +55,7 @@ clarification when needed. Do not invent completion or approval. No tools exist.
 
 class OllamaAdapter:
     provider_mode = "ollama"
-    prompt_version = "ollama-v1"
+    prompt_version = "ollama-v2"
     provider_model = "llama3.2:3b"
     response_limit = 32768
 
@@ -80,7 +80,7 @@ class OllamaAdapter:
                 "prompt": json.dumps(content.model_dump(), ensure_ascii=False),
                 "format": Proposal.model_json_schema(), "stream": False,
                 "keep_alive": "1m", "options": {"temperature": 0, "seed": 0,
-                "num_ctx": 4096, "num_predict": 512}}
+                "num_ctx": 4096, "num_predict": 512, "num_gpu": 0}}
         try:
             async with asyncio.timeout(30):
                 async with httpx.AsyncClient(transport=self.transport, trust_env=False,

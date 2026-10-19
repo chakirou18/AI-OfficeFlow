@@ -22,7 +22,7 @@ def test_mocked_provider_evaluation(fixture):
         body = json.loads(request.content)
         assert request.url == "http://localhost:11434/api/generate"
         assert body["model"] == "llama3.2:3b" and body["stream"] is False
-        assert body["options"] == {"temperature": 0, "seed": 0, "num_ctx": 4096, "num_predict": 512}
+        assert body["options"] == {"temperature": 0, "seed": 0, "num_ctx": 4096, "num_predict": 512, "num_gpu": 0}
         assert body["format"] == Proposal.model_json_schema()
         assert json.loads(body["prompt"]) == {"title": fixture["title"], "description": fixture["description"]}
         assert "untrusted" in body["system"] and "No tools exist" in body["system"]
