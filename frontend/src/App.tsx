@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 
 type Health = 'checking' | 'connected' | 'unavailable'
 type FoundationCheck = { id: string; marker: string; created_at: string }
+type Identity = { handle: string; csrf_token: string }
+let csrfToken = ''
 
 async function readJson<T>(url: string, method = 'GET'): Promise<T> {
   const response = await fetch(url, {
     method,
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...(method !== 'GET' ? { 'X-CSRF-Token': csrfToken } : {}) },
     signal: AbortSignal.timeout(10_000),
   })
   if (!response.ok) throw new Error(`The service returned HTTP ${response.status}.`)
@@ -21,6 +23,52 @@ function ServiceCard({ name, status, detail }: { name: string; status: Health; d
 }
 
 export function App() {
+  const [identity, setIdentity] = useState<Identity | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    readJson<Identity>('/api/v1/auth/me').then(value => {
+      csrfToken = value.csrf_token
+      setIdentity(value)
+    }).catch(() => {}).finally(() => setLoading(false))
+  }, [])
+  if (loading) return <main><p>Checking session…</p></main>
+  if (!identity) return <main><h1>Sign in to AI OfficeFlow</h1>
+    <p>Controlled demo accounts only. Use synthetic data.</p>
+    <form onSubmit={async event => {
+      event.preventDefault()
+      const data = new FormData(event.currentTarget)
+      setError('')
+      try {
+        const response = await fetch('/api/v1/auth/login', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ handle: data.get('handle'), password: data.get('password') }),
+          signal: AbortSignal.timeout(10_000),
+        })
+        if (!response.ok) throw new Error('Sign-in failed. Check your credentials or retry later.')
+        const value = await response.json() as Identity
+        csrfToken = value.csrf_token
+        setIdentity(value)
+      } catch (cause) { setError(cause instanceof Error ? cause.message : 'Sign-in unavailable.') }
+    }}>
+      <p><label>Handle <input name="handle" autoComplete="username" maxLength={40} required /></label></p>
+      <p><label>Password <input name="password" type="password" autoComplete="current-password" maxLength={128} required /></label></p>
+      <button type="submit">Sign in</button>
+    </form>{error && <p role="alert">{error}</p>}
+  </main>
+  return <><div className="topbar"><span>Signed in as {identity.handle}</span>
+    <button onClick={async () => {
+      try {
+        const response = await fetch('/api/v1/auth/logout', { method: 'POST', headers: { 'X-CSRF-Token': csrfToken } })
+        if (!response.ok && response.status !== 401) throw new Error('Sign-out failed. Please retry.')
+        csrfToken = ''
+        setIdentity(null)
+      } catch { setError('Sign-out unavailable. Please retry.') }
+    }}>Sign out</button>{error && <p role="alert">{error}</p>}
+  </div><FoundationApp /></>
+}
+
+function FoundationApp() {
   const [api, setApi] = useState<Health>('checking')
   const [database, setDatabase] = useState<Health>('checking')
   const [record, setRecord] = useState<FoundationCheck | null>(null)
@@ -96,7 +144,7 @@ export function App() {
           </>}
         </div>
       </section>
-      <footer><p>Foundation only. Request workflows, authentication and AI analysis come in later tasks.</p>
+      <footer><p>Authenticated foundation. Request workflows and AI analysis come in later tasks.</p>
         <a href="/api/docs" target="_blank" rel="noreferrer">API documentation ↗</a>
       </footer>
     </main>

@@ -110,3 +110,46 @@ T16 can consume a successful CI run on trusted `main` via a separate
 using deployment credentials. PR runs never deploy. Automatic development deployment,
 manual production promotion and environment approvals are deliberately not implemented
 in T05. Exact CI and merge-gate verification evidence is recorded in Issue #5.
+
+## Controlled demo authentication (T06)
+
+After Compose startup, create an account from a trusted terminal:
+
+```sh
+docker compose exec api python -m app.manage_users create demo_user
+# Password is prompted without echo (16-128 characters); never use real personal data.
+docker compose exec api python -m app.manage_users revoke demo_user
+# revoke deletes all current sessions; disable also prevents future login:
+docker compose exec api python -m app.manage_users disable demo_user
+```
+
+There is no signup API or default demo password. The CLI refuses to overwrite accounts.
+Passwords use salted scrypt (N=16384, r=8, p=5); only SHA-256 session-token hashes
+are stored. Login rotates the current session; logout deletes it. Sessions expire after
+eight hours and disabled users are denied. Five failed account logins lock that account
+for five minutes. This bounded demo still needs deployment-level traffic limits before
+public exposure; it does not claim enterprise authentication guarantees.
+
+`POST /api/v1/auth/login` accepts handle/password JSON with an allowlisted exact
+`Origin`. `GET /api/v1/auth/me` returns handle and a session-bound CSRF token.
+All authenticated mutations require that Origin and `X-CSRF-Token`; logout is POST.
+Cookies are HttpOnly, SameSite=Strict, host-only and Secure by default in Python.
+Compose explicitly permits non-Secure cookies only for its loopback HTTP demo.
+For HTTPS deployment set `COOKIE_SECURE=true` and exact `APP_ORIGINS`; do not
+include untrusted origins. Auth/API responses are not cached. TLS deployment is T16.
+
+The foundation write/read endpoints now require login (write also requires CSRF).
+Health probes remain public and metadata-only. `/api/v1/ops/health` requires a
+separate `Authorization: Bearer ...` token configured privately as `OPS_TOKEN`
+(at least 32 random characters). Empty/unconfigured tokens deny access. This route
+only returns diagnostic health; no incident or repair controls are introduced.
+Demo sessions cannot authorize ops, and the ops bearer token cannot authorize app writes.
+
+The existing persistence script prompts for handle/password or uses private process
+environment `DEMO_HANDLE`/`DEMO_PASSWORD`. Browser smoke tests require those variables
+and an available browser (`BROWSER_CHANNEL=msedge` on this workstation); no credentials
+are committed. The tests now cover sign-in, reload, write failure and sign-out.
+
+Security references: [Python scrypt](https://docs.python.org/3/library/hashlib.html#hashlib.scrypt),
+[OWASP sessions](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html),
+and [OWASP CSRF](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html).

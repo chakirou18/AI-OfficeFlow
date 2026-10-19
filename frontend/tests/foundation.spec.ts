@@ -1,5 +1,20 @@
 import { test, expect } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  if (!process.env.DEMO_HANDLE || !process.env.DEMO_PASSWORD) throw new Error('Set private DEMO_HANDLE and DEMO_PASSWORD for browser tests')
+  await page.goto('/')
+  await page.getByLabel('Handle', { exact: true }).fill(process.env.DEMO_HANDLE)
+  await page.getByLabel('Password', { exact: true }).fill(process.env.DEMO_PASSWORD)
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
+})
+
+test('logout revokes access and returns to sign in', async ({ page }) => {
+  await page.getByRole('button', { name: 'Sign out' }).click()
+  await expect(page.getByRole('heading', { name: 'Sign in to AI OfficeFlow' })).toBeVisible()
+  expect((await page.request.get('/api/v1/auth/me')).status()).toBe(401)
+})
+
 test('browser talks to API, writes PostgreSQL and retrieves the same row after reload', async ({ page }) => {
   const failures: string[] = []
   page.on('pageerror', error => failures.push(error.message))

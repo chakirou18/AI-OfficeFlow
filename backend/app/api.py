@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from uuid import UUID
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine, select, text
@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.database import build_engine
 from app.models import FoundationCheck
+from app.auth import current_user, require_mutation, router as auth_router
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +38,23 @@ def create_app(engine: Engine | None = None) -> FastAPI:
             connection_engine.dispose()
 
     application = FastAPI(
-        title="AI OfficeFlow — T04 foundation",
-        description="Loopback-only synthetic connectivity checks. No request or AI features yet.",
+        title="AI OfficeFlow",
+        description="Authenticated synthetic demonstration API.",
         version="0.1.0",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
         redoc_url=None,
         lifespan=lifespan,
     )
+    application.state.engine = connection_engine
+    application.include_router(auth_router)
+
+    @application.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
 
     @application.exception_handler(SQLAlchemyError)
     async def database_failure(_: Request, error: SQLAlchemyError) -> JSONResponse:
@@ -65,7 +75,8 @@ def create_app(engine: Engine | None = None) -> FastAPI:
         return {"status": "ok", "database": "ok", "migration": revision}
 
     @application.post(
-        "/api/v1/foundation/checks", response_model=CheckResponse, status_code=201
+        "/api/v1/foundation/checks", response_model=CheckResponse, status_code=201,
+        dependencies=[Depends(require_mutation)],
     )
     def save_check() -> FoundationCheck:
         # Fixed synthetic payload, not a premature request-management endpoint.
@@ -76,7 +87,8 @@ def create_app(engine: Engine | None = None) -> FastAPI:
             session.refresh(record)
             return record
 
-    @application.get("/api/v1/foundation/checks/{check_id}", response_model=CheckResponse)
+    @application.get("/api/v1/foundation/checks/{check_id}", response_model=CheckResponse,
+                     dependencies=[Depends(current_user)])
     def read_check(check_id: UUID) -> FoundationCheck:
         with Session(connection_engine) as session:
             record = session.get(FoundationCheck, check_id)
