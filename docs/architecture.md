@@ -85,6 +85,8 @@ Compose should define the frontend, API, worker, PostgreSQL, MCP service, and an
 
 ## Open architectural decisions
 
+T01's [assessment audit](grading-checklist.md) adds explicit T03 decisions: separate dev and production promotion paths, a unified unit/integration test runner, stored telemetry visible in a UI with shared trace-ID correlation, an authenticated alert receiver that automatically wakes the responder, and the coding-agent Extension Pack runtime/package format. These refine the existing design; no component is implemented. Dev deployment is automatic after passing checks; production deployment requires explicit manual initiation. The responder still requires human approval before its scoped staging mutation, and must execute the approved repair itself for the alert-driven demonstration.
+
 1. LangGraph versus DeepAgents: evaluate structured state, durable execution needs, tool permissions, and testability with one synthetic workflow; record an ADR before adopting a framework.
 2. Model provider/model: compare structured-output reliability, cost, latency, retention, and regional data handling; select with a small documented evaluation.
 3. Authentication: managed OIDC versus application sessions; specify provisioning, session expiry, CSRF protections where applicable, and role storage.

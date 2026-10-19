@@ -1,6 +1,6 @@
 # Implementation backlog
 
-The [public GitHub issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) contains one issue for every stable task ID T01–T18. All tasks remain open: T02 is in progress for tracker setup, and the other tasks are todo. This is a setup snapshot; GitHub holds the live status. No application acceptance criteria are claimed complete. Dependencies mean prerequisites for completion; independent preparation may start earlier.
+The [public GitHub issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) contains one issue for every stable task ID T01–T18. All tasks remain open. T01 has undergone a requirements audit with pilot confirmation still pending; T02 has partial tracker-setup evidence. GitHub holds the live status labels. No application acceptance criteria are claimed complete. Dependencies mean prerequisites for completion; independent preparation may start earlier.
 
 Use the public tracker actively throughout development. Before implementing work, read and reference its issue, acceptance criteria, dependencies, and latest comments. Record progress, blockers, decisions/ADRs, exact check commands and outcomes, commit/PR links, and completion evidence in the issue. Keep this backlog and issue scope synchronized. A list of newly created issues alone is not evidence of sustained tracker use.
 
@@ -51,3 +51,23 @@ The [T02 setup evidence comment](https://github.com/chakirou18/AI-OfficeFlow/iss
 | T18 | Assemble final evidence and handover | All official criteria cross-checked; actual CI/deployment/demo/alert/recovery links included; performance target measured; limitations, setup and operations docs validated from clean checkout | T02, T12, T15, T16, T17 | [#18](https://github.com/chakirou18/AI-OfficeFlow/issues/18) |
 
 Each implementation task includes updating relevant documentation and recording evidence before closure. T12 consolidates coverage; testing begins with the first implementation task. T18 must flag unmet criteria rather than replacing missing evidence with claims.
+
+## T01 assessment audit: additive acceptance refinements
+
+The [grading checklist](grading-checklist.md) now maps all official twelve criteria and maximum scores (24 total) to tasks and evidence status. The [Module 5 checklist](module5-checklist.md) maps all seven required Extension Pack capabilities. Official source revisions are linked in both documents. The original task rows and dependencies above remain intact; the following refinements add the precise full-score and completion gates discovered during the audit. Read these with the linked issue before implementation and record evidence against that issue.
+
+| Task | Additional acceptance detail / completion gate |
+| --- | --- |
+| T01 / #1 | Official rubric and Module 5 sources are pinned; all criteria mapped and gaps recorded. Pilot assumptions A01–A06 require user decisions or an explicit accepted deferral before the pilot-review criterion is complete. Do not infer approval from silence. |
+| T03 / #3 | Decide separate dev/production release topology, trace/log storage and UI, alert receiver authentication/deduplication, and Extension Pack runtime/format. Existing provider, orchestration, identity and data-handling ADR scope is retained. |
+| T04 / #4 | A single documented Compose command starts the connected complete application including PostgreSQL and required services; clean-checkout evidence includes persistence after application restart. |
+| T05 / #5 | Run tests automatically on every PR; prepare the same tested versioned artifact for automatic dev and manually initiated production releases in T16. Keep existing lint, type and merge-check scope. |
+| T12 / #12 | Both unit and integration suites must pass with one documented command, using isolated real PostgreSQL and deterministic model stubs; retain command, exit status and CI evidence. Separate suite commands do not replace this gate. |
+| T13 / #13 | Metrics, traces and structured logs are collected, stored and visible in a UI for a key journey with shared trace context and trace-ID correlation. Demonstrate async propagation and metric exemplars/drill-down; do not add high-cardinality trace-ID metric labels or sensitive telemetry. |
+| T14 / #14 | The user-impact alert is routed to an authenticated receiver that automatically wakes the on-call agent; retain receipt, invocation and deduplication evidence as well as threshold/runbook evidence. |
+| T15 / #15 | Show automatic alert-triggered wake-up, diagnosis, operator approval, agent-executed allowlisted repair and verified recovery. A manually started agent, diagnosis-only result, or human-executed fix does not complete this gate. Existing staging-only single-action limits remain. |
+| T16 / #16 | Demonstrate tests, automatic dev deployment and a separate manual production deployment of a tested versioned artifact, plus existing HTTPS, secret, migration, backup and rollback requirements. Production may still use synthetic demo data. |
+| T17 / #17 | Demonstrate every requirement in module5-checklist.md: instructions, reusable workflow, specialized subagent, MCP, hook/guardrail, package OR custom agent, and permissions note. No separate graded Module 5 homework exists. Defer an item only as an explicitly unmet requirement. |
+| T18 / #18 | Audit actual evidence for all 12 criteria and all seven Module 5 items; record course-platform confirmation for three distinct mandatory peer reviews before claiming course completion. Keep platform-sensitive review details private. |
+
+The T01 pilot assumption register is in [specification.md](specification.md#pilot-assumptions-requiring-confirmation). T01 is not complete while that confirmation remains unresolved. T02 is not being reviewed for closure during this audit because its T01 dependency is unsatisfied.

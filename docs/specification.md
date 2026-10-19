@@ -8,6 +8,21 @@ The MVP serves one configured business per deployment. Employees enter plain-tex
 
 No outbound communication or external-system mutation is included. The platform does not provide binding energy advice or generate executable commercial commitments. Account provisioning is controlled; public self-registration is excluded.
 
+## Pilot assumptions requiring confirmation
+
+T01 audit status: these are proposed project choices, not confirmed Entropie operating procedures. The user identified the intended pilot and sector; this does not validate detailed workflows or grant access to company systems/data. User confirmation has been requested; no response or authorized stakeholder sign-off is recorded yet. Record explicit decisions on Issue #1 before marking its pilot-review criterion complete. An unresolved assumption may be deliberately deferred for a synthetic prototype only if that boundary is explicitly accepted and documented.
+
+| ID | Proposed assumption | Required confirmation / decision owner | Current status |
+| --- | --- | --- | --- |
+| A01 | Manual text entry, one business per deployment, internal tasks only, and human approval are sufficient for the initial pilot | User/product owner confirms scope; business stakeholder later validates fit | Pending |
+| A02 | Service type, site location, customer contact, project description and desired timeframe are the correct required fields | Authorized pilot stakeholder confirms fields and supplies only synthetic examples initially | Pending |
+| A03 | Employees can view requests across the single-business deployment; reviewer, administrator and operator permissions are separate | User identifies role policy and who is authorized to validate it; private identities need not be published | Pending |
+| A04 | Owners may be unassigned, deadlines are advisory, and a reviewer resolves missing information before work begins | Pilot workflow owner confirms assignment, business calendar/timezone and deadline policy; no default SLA is promised | Pending |
+| A05 | Development, CI, screenshots and public demonstrations use synthetic data; real pilot data/provider processing is deferred | User confirms synthetic-only prototype boundary; authorized business owner must separately approve any later real-data use, retention and provider handling | Pending; synthetic data remains the safe working default |
+| A06 | Staging fault injection and operator-approved recovery are acceptable for the demonstration | User/operator confirms later test environment and action boundary before an operational exercise | Pending; no operational exercise authorized by this audit |
+
+Architecture choices such as provider, hosting, identity/session mechanism, trace storage and release controls remain T03 decisions. These must not be conflated with stakeholder confirmation of business behavior. See [permissions.md](permissions.md) for data authorization boundaries.
+
 ## Roles and lifecycle
 
 - **Employee:** create and read requests, request analysis, and view proposals.
@@ -89,6 +104,7 @@ As an operator, I can detect user impact and supervise a bounded recovery action
 
 - A staging exercise pauses agent processing through an explicit fault flag; analysis submissions remain accepted but queue age exceeds the alert threshold.
 - An alert fires when the oldest queued run exceeds 120 seconds for 2 minutes and links to a runbook and dashboard.
+- Authenticated alert delivery automatically invokes the on-call agent; incident identifiers deduplicate repeated delivery. Record alert receipt and agent wake-up without manual initiation.
 - The on-call agent can inspect redacted telemetry and propose only an allowlisted reset of that staging flag.
 - An authorized operator approves recovery; execution is audited, limited to one action per incident, and followed by a probe showing queued work finishes within 180 seconds. Failed verification escalates to a human without further autonomous mutation.
 - A recording and incident report capture alert, diagnosis, approval, recovery, and measured timing using synthetic requests.
@@ -96,11 +112,14 @@ As an operator, I can detect user impact and supervise a bounded recovery action
 ## Quality and delivery acceptance
 
 - Unit tests cover validation, role policy, status transitions, stale approvals, idempotency, and agent schemas; integration tests use real PostgreSQL and a deterministic model stub.
+- Both unit and integration suites run and pass through one documented command with an aggregate exit code; separate per-suite commands remain useful for development. Proposed `docker compose --profile test run --build --rm test` is not implemented yet.
 - A browser smoke test covers create → analyze → review → approve → dashboard update, plus rejection and unauthorized approval.
 - Local acceptance target: seeded 1,000-request dataset, 10 concurrent users, request list/detail p95 under 1 second over a 5-minute run on documented hardware. Provider latency is measured separately, with a configurable 120-second run timeout and at most two retries for transient failures.
 - A clean checkout starts through documented Docker Compose instructions, runs migrations, and exposes health checks; CI runs required checks before deployment.
 - A public HTTPS staging demonstration uses access control, synthetic records, a documented deployment procedure, and a verified rollback procedure.
-- Telemetry correlates API requests, agent runs, and approval events by identifiers without sensitive payloads. Dashboard and alert evidence is reproducible.
+- CI runs tests on every pull request; successful tested main releases deploy automatically to a separate dev environment. Production promotion is explicitly initiated through a manual deployment workflow using the tested versioned artifact. Record both deployment paths and rollback evidence.
+- Telemetry includes metrics, traces and structured logs with shared trace context, collected and stored for viewing in a UI. Show trace-ID correlation across API requests and agent work using log fields and trace-linked metric exemplars/drill-down; metrics retain low-cardinality labels. Approval requests may start new traces explicitly linked to the originating run. No customer data, prompts or credentials enter telemetry. Dashboard and alert evidence is reproducible.
+- T18 records three completed course-assigned peer reviews; these are mandatory for passing regardless of points. T17 demonstrates all seven [Module 5 Extension Pack items](module5-checklist.md). Runtime evidence is tracked separately in the [grading checklist](grading-checklist.md).
 
 ## Deferred scope
 

@@ -60,12 +60,16 @@ LangGraph is the initial orchestration candidate; DeepAgents remains an alternat
 - [Numbered backlog and dependencies](docs/backlog.md)
 - [Coding-agent team](docs/agent-team.md)
 - [Permissions and approval boundaries](docs/permissions.md)
+- [Official grading criteria and evidence status](docs/grading-checklist.md)
+- [Module 5 Agent Extension Pack checklist](docs/module5-checklist.md)
 - [Development conventions](AGENTS.md)
 
 ## Development and delivery
 
 There are no runnable commands yet. Proposed commands and conventions are in [AGENTS.md](AGENTS.md); they must be implemented and verified before being advertised as working.
 
-The roadmap targets all twelve stated assessment areas, including a public issue tracker, automated tests, public deployment, user-impact alerting, and an on-call demonstration. The assessment mapping is provisional until checked against the official 2026 rubric. The Module 5 Agent Extension Pack has a dedicated roadmap checkpoint; its exact requirements must also be verified before implementation.
+The roadmap targets the official **12 criteria / 24 points**: Problem Description, Product Specification, Agent Team Specification, Context Management, Application, Testing, Containerization, Deployment, CI/CD, Observability, Alerting on User Impact, and On-Call Agent. The [grading checklist](docs/grading-checklist.md) maps required evidence to public tasks and distinguishes inspected documentation from unverified runtime behavior. Full-score delivery includes one-command startup and tests, automatic dev deployment plus manual production deployment, correlated telemetry stored and visible in a UI, and an alert-driven repair demonstration. No score is claimed.
+
+Module 5 has no separate graded homework; its seven-item [Agent Extension Pack](docs/module5-checklist.md) must be carried into the final project. **Reviewing three other projects is mandatory to pass**, independently of project points. Peer reviews and the Extension Pack demonstration remain unfinished. Official sources are pinned in the checklists; course-platform assignments and deadlines still need checking.
 
 The [public repository](https://github.com/chakirou18/AI-OfficeFlow) and [GitHub issue tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) are available. Tasks T01–T18 are linked in the [backlog](docs/backlog.md), with acceptance criteria, dependencies, phase milestones, and a documented status workflow. Application implementation remains planned. Deployment URLs, CI badges, demonstration recordings, and measured results must be added only after they exist. Use synthetic data for public demonstrations and never commit credentials or customer information.

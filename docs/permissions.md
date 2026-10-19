@@ -6,7 +6,7 @@ Status: intended policy for implementation. Controls described here are requirem
 
 Use synthetic requests for development, automated tests, screenshots, public issues, and demonstrations. Customer names, email addresses, phone numbers, addresses, site details, commercial information, and request bodies may be sensitive. Store only fields needed for the workflow; do not collect identity documents, payment credentials, or unrelated sensitive information.
 
-Provider keys, database passwords, session secrets, CI credentials and telemetry tokens belong in local untracked configuration or the chosen secret manager. Add ignore rules and a placeholder-only example configuration when scaffolding begins; neither exists yet. Never place secrets in frontend bundles, Git history, Docker image layers, logs, traces, agent prompts, or public artifacts. Redact exception output and model/tool payloads.
+Provider keys, database passwords, session secrets, CI credentials and telemetry tokens belong in local untracked configuration or the chosen secret manager. A root .gitignore exists; a placeholder-only example configuration must be added when scaffolding begins and does not exist yet. Never place secrets in frontend bundles, Git history, Docker image layers, logs, traces, agent prompts, or public artifacts. Redact exception output and model/tool payloads.
 
 Use separate development, CI, staging, and production credentials. Scope access to each service and environment. Prefer short-lived deployment credentials where supported. If a secret leaks, stop affected operations, notify the maintainer without reproducing it, arrange authorized revocation/rotation, and assess exposure. Removing a file alone does not revoke a leaked key.
 
@@ -35,6 +35,10 @@ Creating a request, viewing permitted data, and running read-only analysis requi
 External email, customer contact, binding quotations, purchases, CRM mutation, and external scheduling are outside the MVP. Adding them requires a new permission design, an explicit user-facing approval step, scoped tools, auditability, and acceptance tests. Approval for one proposal never authorizes unrelated future actions.
 
 Operational approval is separate: an operator approves one specific staging recovery action for one incident. The recovery service checks environment, incident identity, action allowlist, expiry, and whether that action has already executed. Enforce a single attempt, verify synthetic queue processing within 180 seconds, and escalate if verification fails. The application must not infer approval from silence or model confidence.
+
+An authenticated alert receiver must automatically wake the responder and deduplicate repeated incidents. Wake-up and read-only diagnosis do not authorize mutation: the agent waits for approval and then executes the exact allowlisted staging reset itself. A human performing the repair or manually starting the agent is not the intended alert-driven repair evidence. Production deployment remains a separate manually initiated, authorized release workflow; automatic dev deployment cannot promote itself to production.
+
+The Module 5 coding-agent reviewer and MCP client require separate scoped identities and an executable guardrail as planned in [module5-checklist.md](module5-checklist.md). Current team role descriptions do not establish registered subagents or enforced hooks. Any later subagent demonstration still requires explicit user authorization. Pilot assumptions and permission ownership remain pending in the [specification](specification.md#pilot-assumptions-requiring-confirmation).
 
 ## Untrusted content and model boundaries
 

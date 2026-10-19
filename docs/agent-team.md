@@ -32,6 +32,8 @@ One developer or coding agent may perform several roles. This document does not 
 
 Public issues must show real progress and decisions throughout development. Never include secrets, private customer content, raw model prompts containing sensitive data, or internal access links in public handoffs.
 
+The [grading checklist](grading-checklist.md) maps the official Agent Team Specification criterion to this document; clear responsibilities and collaboration are documentation evidence. The [Module 5 checklist](module5-checklist.md) separately requires a registered specialized subagent, reusable workflow, MCP call, executable guardrail and package or custom agent demonstration. Team roles alone do not satisfy that runtime deliverable. No delegation is authorized by this audit.
+
 ## Business-agent contracts
 
 The Sales Agent receives a versioned request snapshot and configured required fields; it returns structured facts, supporting excerpts, unknowns, and missing details. The Coordination Agent consumes that validated result and returns suggested internal tasks with assumptions. Neither has database write tools, approval rights, or outbound communication permissions.

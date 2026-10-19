@@ -15,6 +15,8 @@ Read the working tree before changing it. Preserve unrelated user edits and exis
 - [Backlog](docs/backlog.md): stable task identifiers, dependencies, exact public issue links, labels, and status workflow.
 - [Agent team](docs/agent-team.md): coding responsibilities and handoffs.
 - [Permissions](docs/permissions.md): secrets, customer data, approvals, operational boundaries.
+- [Grading checklist](docs/grading-checklist.md): official 12-criterion / 24-point evidence map, audit gaps and mandatory three peer reviews.
+- [Module 5 checklist](docs/module5-checklist.md): seven Extension Pack artifacts and planned demonstration; no separate graded homework.
 
 Read only the additional context relevant to a task. Record significant architecture choices in numbered ADRs under `docs/decisions/` when implementation begins; no ADRs exist yet.
 
@@ -49,6 +51,7 @@ Run none of these as if they already work. Implement the associated files and ve
 | Apply migrations | `docker compose run --rm api alembic upgrade head` | Planned; service and migration configuration absent |
 | Backend unit tests | `python -m pytest backend/tests/unit` | Planned; environment and tests absent |
 | Integration tests | `python -m pytest tests/integration` | Planned; isolated test database required |
+| Both unit and integration suites in one command | `docker compose --profile test run --build --rm test` | Planned; test service, suites and configuration absent; must provision isolated PostgreSQL and propagate failure exit codes |
 | Python lint | `ruff check backend agents tools tests` | Planned; tool/configuration absent |
 | Python type check | `mypy backend agents tools` | Planned; tool/configuration absent |
 | Frontend development | `npm --prefix frontend run dev` | Planned; package and script absent |
@@ -57,6 +60,8 @@ Run none of these as if they already work. Implement the associated files and ve
 | Browser smoke tests | `npm --prefix frontend run test:e2e` | Planned; script and test setup absent |
 
 ## Coding-agent responsibilities
+
+Before claiming assessment readiness, check every criterion and its actual evidence in the grading checklist, the seven Module 5 items, and three mandatory peer-review submissions. Role descriptions do not prove a registered specialized subagent, and planned commands do not prove working behavior. Pilot assumptions in the specification require explicit confirmation; a technical audit is not company approval.
 
 The lead coordinates scope and evidence; product/architecture roles maintain requirements and ADRs; frontend/backend roles implement the approved slice; the agent/tools role owns graph and MCP boundaries; QA/security and platform roles verify behavior and operations. These are responsibilities, not a requirement to run multiple agents. Do not spawn or delegate to other agents unless the user explicitly requests it. See [agent-team.md](docs/agent-team.md) for handoffs.
 
