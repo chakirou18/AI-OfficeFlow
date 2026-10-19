@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
   if (!process.env.DEMO_HANDLE || !process.env.DEMO_PASSWORD) throw new Error('Set private DEMO_HANDLE and DEMO_PASSWORD for browser tests')
-  await page.goto('/')
+  await page.goto('/#foundation')
   await page.getByLabel('Handle', { exact: true }).fill(process.env.DEMO_HANDLE)
   await page.getByLabel('Password', { exact: true }).fill(process.env.DEMO_PASSWORD)
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
@@ -18,7 +18,7 @@ test('logout revokes access and returns to sign in', async ({ page }) => {
 test('browser talks to API, writes PostgreSQL and retrieves the same row after reload', async ({ page }) => {
   const failures: string[] = []
   page.on('pageerror', error => failures.push(error.message))
-  await page.goto('/')
+  await page.goto('/#foundation')
   await expect(page.getByRole('heading', { name: 'A connected foundation.' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Service health' }).getByText('connected')).toHaveCount(3)
   await page.getByRole('button', { name: 'Save synthetic check' }).click()
@@ -32,7 +32,7 @@ test('browser talks to API, writes PostgreSQL and retrieves the same row after r
 })
 
 test('failed database write shows an error instead of a false success', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/#foundation')
   const button = page.getByRole('button', { name: 'Save synthetic check' })
   await expect(button).toBeEnabled()
   await page.route('**/api/v1/foundation/checks', route => route.fulfill({ status: 503, json: { detail: 'Database unavailable' } }))

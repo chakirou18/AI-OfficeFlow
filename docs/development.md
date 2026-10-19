@@ -1,6 +1,6 @@
 # Local development guide
 
-Scope: the React/FastAPI/PostgreSQL foundation, T05 CI, T06 controlled authentication and T07 request/task API. Request UI, AI/approval, deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See the sections below for account setup and API contracts; historical T04-only evidence remains in its separate verification record.
+Scope: the React/FastAPI/PostgreSQL foundation, T05 CI, T06 controlled authentication and T07 request/task API and T08 request workspace/dashboard. AI/approval, deployment, telemetry and incident features remain later tasks. Keep the current Compose setup local. See the sections below for account setup and API contracts; historical T04-only evidence remains in its separate verification record.
 
 ## Prerequisites and configuration
 
@@ -191,3 +191,40 @@ session reads, fresh application instances, maximum page size, deterministic pag
 state/filter derivation, repeat updates, database constraints and auth/CSRF/ops denials.
 `docker compose --profile test run --rm test alembic check` verifies ORM/migration drift.
 Actual local/CI counts and results are recorded on Issue #7.
+
+
+## Request workspace and isolated browser tests (T08)
+
+Sign in at http://127.0.0.1:8080. Overview shows real request/task totals, status
+links and recent persisted requests/task updates. Requests provides create, paginated
+list/filter, detail, priorities and open/done updates. Refresh reloads persisted state;
+expired sessions return to sign-in. System health retains the T04 write/read check.
+No live AI, analysis history, invented activity or task-creation UI is present.
+`GET /api/v1/dashboard` is an authenticated read-only extension that aggregates the
+entire workspace in a consistent PostgreSQL snapshot, independent of list pagination.
+
+For repeatable browser checks, install the locked frontend packages (`npm --prefix
+frontend ci`) and an available Playwright browser. On this workstation use installed
+Edge; on other machines install Playwright Chromium with `npm --prefix frontend exec
+-- playwright install chromium` after checking platform prerequisites.
+
+```powershell
+$env:BROWSER_CHANNEL = 'msedge'  # omit when using installed Playwright Chromium
+python scripts/test_browser.py
+```
+
+The helper starts only the dedicated `officeflow-browser` Compose project at ports
+8081/8001, with database `officeflow_browser_test` and a private generated password in
+ignored `artifacts/browser.env`. It creates a random-password test account and resets
+only its own named fixture records. The CLI seed refuses a non-`_test` database or
+missing explicit `BROWSER_FIXTURES=enabled`. Seeded task rows are clearly synthetic
+approved-task test fixtures, not evidence of a T11 human approval operation. No seed
+endpoint exists and normal startup never seeds tasks. Tests cover real API/DB state;
+503/loading simulations are explicit test-only route intercepts. Screenshots are
+written to ignored `artifacts/t08-desktop.png` and `artifacts/t08-mobile.png`.
+
+The helper stops/removes its own containers/network on completion, preserving its
+volume and the ordinary local stack/data. Do not run two copies concurrently. No
+credentials are printed or committed. Existing backend aggregate tests remain
+`docker compose --profile test run --build --rm test`. Exact outcomes and CI evidence
+are recorded on Issue #8.
