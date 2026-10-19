@@ -69,7 +69,7 @@ counts and migration revision, then stops only that scratch container.
 ## Commands and activation gate
 
 Local preparation/rehearsal is authorized by T16; it does not activate a controller
-or publish any image. A local manifest may use exact image configuration IDs
+or publish any image. A local manifest may use exact local Docker image IDs
 (`sha256:...`) with null workflow IDs and `--local-rehearsal`; these are explicitly
 **not registry digests or hosted-CI attestations**. The real controller rejects them.
 

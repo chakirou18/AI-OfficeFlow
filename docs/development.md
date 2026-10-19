@@ -108,11 +108,11 @@ database configuration and `python -m alembic upgrade head` before
 remain the simplest full database test command. Frontend checks are
 `npm --prefix frontend run lint` and `npm --prefix frontend run build` after `npm ci`.
 
-T16 can consume a successful CI run on trusted `main` via a separate
-`workflow_run` workflow, checking success, repository, branch and commit before
-using deployment credentials. PR runs never deploy. Automatic development deployment,
-manual production promotion and environment approvals are deliberately not implemented
-in T05. Exact CI and merge-gate verification evidence is recorded in Issue #5.
+T16's [private deployment preparation](deployment.md) adds a trusted-main release
+workflow and manual digest promotion. PR runs never deploy. Image publishing and
+request creation are not deployment evidence; actual automatic activation remains
+subject to the documented host/bootstrap approval gates and Issue #16 evidence.
+Historical CI and merge-gate verification evidence remains in Issue #5.
 
 ## Controlled demo authentication (T06)
 
