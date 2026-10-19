@@ -3,7 +3,8 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, Uuid, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, Uuid, func, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -79,3 +80,30 @@ class Task(Base):
     state: Mapped[str] = mapped_column(String(4), default="open", server_default="open")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AnalysisRun(Base):
+    __tablename__ = "analysis_runs"
+    __table_args__ = (
+        UniqueConstraint("request_id", "idempotency_key", name="unique_analysis_attempt_key"),
+        Index("unique_active_analysis", "request_id", unique=True,
+              postgresql_where=text("state IN ('running', 'pending')")),
+        CheckConstraint("state IN ('running', 'pending', 'approved', 'rejected', 'failed')", name="analysis_state"),
+        CheckConstraint("deadline_at > started_at AND deadline_at <= started_at + interval '30 seconds'", name="analysis_deadline"),
+        CheckConstraint("state NOT IN ('pending', 'approved', 'rejected') OR proposal IS NOT NULL", name="analysis_proposal"),
+        CheckConstraint("state <> 'failed' OR error_code IS NOT NULL", name="analysis_failure"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True, default=uuid4)
+    request_id: Mapped[UUID] = mapped_column(ForeignKey("requests.id", ondelete="CASCADE"), index=True)
+    requested_by: Mapped[UUID] = mapped_column(ForeignKey("demo_users.id"))
+    idempotency_key: Mapped[UUID] = mapped_column(Uuid)
+    state: Mapped[str] = mapped_column(String(8))
+    provider_mode: Mapped[str] = mapped_column(String(16), default="simulated")
+    schema_version: Mapped[str] = mapped_column(String(16), default="proposal-v1")
+    prompt_version: Mapped[str] = mapped_column(String(16), default="offline-v1")
+    proposal: Mapped[dict | None] = mapped_column(JSONB(none_as_null=True))
+    error_code: Mapped[str | None] = mapped_column(String(32))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    deadline_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

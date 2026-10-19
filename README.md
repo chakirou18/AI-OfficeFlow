@@ -95,3 +95,9 @@ updates. Request-management UI, analysis and human approval remain later tasks.
 
 
 T08 browser verification: `python scripts/test_browser.py` starts a separate test-only Compose project, seeds guarded synthetic fixtures and runs Playwright. See [the isolated browser setup](docs/development.md#request-workspace-and-isolated-browser-tests-t08).
+
+
+T09 adds an **offline, simulated analysis API** with persisted attempts, a 30-second
+deadline, explicit retry and schema-validated inactive proposals. A local read-only MCP
+stdio tool returns bounded synthetic request summaries. No live model calls or task
+approval is implemented. See [analysis and MCP usage](docs/development.md#bounded-offline-analysis-and-read-only-mcp-t09).
