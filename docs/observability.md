@@ -3,7 +3,9 @@
 The application sends real OTel metrics, traces and structured events to a private
 Collector. Prometheus stores metrics/exemplars, Loki stores events and Tempo stores
 traces. Grafana provisions all three data sources and dashboard `officeflow`.
-This is local synthetic-data observability, not T14 alerting or a production SLA.
+This is local synthetic-data observability. T14 adds private Alertmanager routing
+and a receipt-only listener; see the [analysis failure runbook](runbooks/analysis-http-failures.md).
+No production SLA or autonomous remediation is provided.
 
 ## Start and access
 

@@ -20,6 +20,7 @@ from app.analysis import router as analysis_router
 from app.decisions import router as decisions_router
 from app.model_adapter import configured_adapter
 from app.telemetry import Telemetry, TelemetryMiddleware, configured_telemetry
+from app.dev_fault import DevAnalysisFault
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,7 @@ def create_app(engine: Engine | None = None, *, telemetry: Telemetry | None = No
     application.state.engine = connection_engine
     application.state.model_adapter = configured_adapter()
     application.state.telemetry = observer
+    application.state.dev_analysis_fault = DevAnalysisFault()
     application.include_router(auth_router)
     application.include_router(requests_router)
     application.include_router(analysis_router)
