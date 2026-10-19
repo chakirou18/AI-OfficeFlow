@@ -34,6 +34,9 @@ class AnalysisResponse(BaseModel):
     started_at: datetime
     deadline_at: datetime
     ended_at: datetime | None
+    decided_by: UUID | None
+    decided_at: datetime | None
+    rejection_reason: str | None
 
 
 def expire_interrupted(db: Session, request_id: UUID):

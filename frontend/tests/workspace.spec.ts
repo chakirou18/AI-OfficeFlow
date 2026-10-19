@@ -10,6 +10,83 @@ async function signIn(page: import('@playwright/test').Page) {
 
 test.beforeEach(async ({ page }) => { await signIn(page) })
 
+async function createPending(page: import('@playwright/test').Page, title: string) {
+  await page.getByRole('link', { name: 'New request' }).click()
+  await page.getByLabel('Request title').fill(title)
+  await page.getByLabel('Description', { exact: true }).fill('Synthetic request for explicit human review only.')
+  await page.getByRole('button', { name: 'Create request', exact: true }).click()
+  await page.getByRole('button', { name: 'Analyze request', exact: true }).click()
+  await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
+  const id = page.url().split('#requests/')[1]
+  return (await page.request.get(`/api/v1/requests/${id}`)).json()
+}
+
+test('human approval saves only the selected analysis once and refreshes dashboard counts', async ({ page }) => {
+  const before = await (await page.request.get('/api/v1/dashboard')).json()
+  const detail = await createPending(page, 'Synthetic browser approval')
+  const decisionResponse = page.waitForResponse(response => response.request().method() === 'POST' && response.url().endsWith('/decision'))
+  await page.getByRole('button', { name: 'Approve suggestions', exact: true }).click()
+  const response = await decisionResponse
+  expect(response.status()).toBe(200)
+  expect(response.request().headers()['x-csrf-token']).toBeTruthy()
+  const saved = await response.json()
+  expect(saved.analysis.id).toBe(detail.analysis.id)
+  expect(saved.tasks).toHaveLength(detail.analysis.proposal.tasks.length)
+  await expect(page.getByText('Suggestions approved. Tasks saved.')).toBeVisible()
+  await expect(page.getByText('Saved attempt: Simulated · approved')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Approve suggestions', exact: true })).toHaveCount(0)
+  await page.reload()
+  await expect(page.getByText('Saved attempt: Simulated · approved')).toBeVisible()
+  const me = await (await page.request.get('/api/v1/auth/me')).json()
+  const headers = { Origin: new URL(page.url()).origin, 'X-CSRF-Token': me.csrf_token }
+  const endpoint = `/api/v1/requests/${detail.id}/analyses/${detail.analysis.id}/decision`
+  const repeated = await page.request.post(endpoint, { headers, data: { decision: 'approve' } })
+  expect((await repeated.json()).tasks.map((task: { id: string }) => task.id)).toEqual(saved.tasks.map((task: { id: string }) => task.id))
+  expect((await page.request.post(endpoint, { headers, data: { decision: 'reject', reason: 'Synthetic late conflict' } })).status()).toBe(409)
+  await page.getByRole('link', { name: 'Overview', exact: true }).click()
+  await expect(page.getByTestId('approved-tasks')).toHaveText(String(before.total_tasks + saved.tasks.length))
+  await expect(page.getByTestId('open-tasks')).toHaveText(String(before.open_tasks + saved.tasks.length))
+})
+
+test('human rejection requires a reason, creates no tasks and allows explicit reanalysis', async ({ page }) => {
+  const before = await (await page.request.get('/api/v1/dashboard')).json()
+  const detail = await createPending(page, 'Synthetic browser rejection')
+  await page.getByRole('button', { name: 'Reject suggestions', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Enter a rejection reason')
+  const reason = 'Synthetic scope unclear <script>window.syntheticInjected=true</script>'
+  await page.getByLabel('Rejection reason', { exact: true }).fill(reason)
+  await page.getByRole('button', { name: 'Reject suggestions', exact: true }).click()
+  await expect(page.getByText('Suggestions rejected. No tasks created.')).toBeVisible()
+  await expect(page.getByText('Saved attempt: Simulated · rejected')).toBeVisible()
+  await expect(page.getByText(`Rejection reason: ${reason}`, { exact: true })).toBeVisible()
+  expect(await page.evaluate(() => 'syntheticInjected' in window)).toBe(false)
+  await page.reload()
+  await expect(page.getByText(`Rejection reason: ${reason}`, { exact: true })).toBeVisible()
+  const saved = await (await page.request.get(`/api/v1/requests/${detail.id}`)).json()
+  expect(saved.tasks).toEqual([])
+  expect(saved.status).toBe('new')
+  expect((await (await page.request.get('/api/v1/dashboard')).json()).total_tasks).toBe(before.total_tasks)
+  await page.getByRole('button', { name: 'Retry analysis', exact: true }).click()
+  await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
+  const retried = await (await page.request.get(`/api/v1/requests/${detail.id}`)).json()
+  expect(retried.analysis.id).not.toBe(detail.analysis.id)
+  expect(retried.tasks).toEqual([])
+})
+
+test('decision failure preserves pending state and retry does not claim false success', async ({ page }) => {
+  const detail = await createPending(page, 'Synthetic browser decision failure')
+  await page.route('**/analyses/*/decision', route => route.fulfill({ status: 503, json: { detail: 'Synthetic unavailable test' } }))
+  await page.getByRole('button', { name: 'Approve suggestions', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('HTTP 503')
+  await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
+  expect((await (await page.request.get(`/api/v1/requests/${detail.id}`)).json()).tasks).toEqual([])
+  await expect(page.getByText('Suggestions approved. Tasks saved.')).toHaveCount(0)
+  await page.unroute('**/analyses/*/decision')
+  await page.getByRole('button', { name: 'Approve suggestions', exact: true }).click()
+  await expect(page.getByText('Saved attempt: Simulated · approved')).toBeVisible()
+  await page.screenshot({ path: '../artifacts/t11-approval.png', fullPage: true })
+})
+
 test('analysis is explicitly simulated, persisted and inactive', async ({ page }) => {
   await page.getByRole('link', { name: 'New request' }).click()
   await page.getByLabel('Request title').fill('Synthetic browser analysis')
@@ -22,7 +99,7 @@ test('analysis is explicitly simulated, persisted and inactive', async ({ page }
   expect(headers['idempotency-key']).toBeTruthy()
   expect(headers['x-csrf-token']).toBeTruthy()
   await expect(page.getByText('Saved attempt: Simulated · pending')).toBeVisible()
-  await expect(page.getByText('Pending human review. Suggestions are inactive; approval is not available yet.')).toBeVisible()
+  await expect(page.getByText('Pending human review. Suggestions are inactive until approved.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Analyze request', exact: true })).toHaveCount(0)
   await expect(page.getByRole('heading', { name: 'No approved tasks yet' })).toBeVisible()
   await page.reload()

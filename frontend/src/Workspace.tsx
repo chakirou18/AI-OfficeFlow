@@ -70,7 +70,7 @@ export function Workspace({ handle, logout, signingOut, authError }: { handle: s
             </section></div>
           </>}
         </> : route.view === 'new' ? <RequestForm onCreated={id => { refresh(); window.location.hash = `requests/${id}`; setTimeout(() => setNotice('Request created successfully.'), 0) }} />
-          : route.view.startsWith('requests') ? route.id ? <RequestDetail key={route.id} id={route.id} revision={revision} changed={() => { refresh(); setNotice('Task status updated.') }} /> : <RequestList key={window.location.hash} revision={revision} />
+          : route.view.startsWith('requests') ? route.id ? <RequestDetail key={route.id} id={route.id} revision={revision} changed={message => { refresh(); setNotice(message) }} /> : <RequestList key={window.location.hash} revision={revision} />
           : <div className="empty"><h2>Page not found</h2><a href="#dashboard">Return to overview</a></div>}
       </>}
       <footer className="workspace-footer"><span>AI OfficeFlow · Zoomcamp 2026</span><span>Synthetic data only</span></footer>
@@ -122,7 +122,8 @@ function RequestList({ revision }: { revision: number }) {
   </section>
 }
 
-function RequestDetail({ id, revision, changed }: { id: string; revision: number; changed: () => void }) {
+function RequestDetail({ id, revision, changed }: { id: string; revision: number; changed: (message: string) => void }) {
+  const [reason, setReason] = useState(''); const [decisionError, setDecisionError] = useState('')
   const [config, setConfig] = useState<AnalysisConfig | null>(null)
   const [analysisError, setAnalysisError] = useState('')
   const [detail, setDetail] = useState<Detail | null>(null); const [loading, setLoading] = useState(true)
@@ -144,9 +145,21 @@ function RequestDetail({ id, revision, changed }: { id: string; revision: number
   }
   async function update(task: Task) {
     setBusy(task.id); setMutationError('')
-    try { await api(`/api/v1/requests/${id}/tasks/${task.id}`, 'PATCH', { state: task.state === 'open' ? 'done' : 'open' }); changed() }
+    try { await api(`/api/v1/requests/${id}/tasks/${task.id}`, 'PATCH', { state: task.state === 'open' ? 'done' : 'open' }); changed('Task status updated.') }
     catch (cause) { setMutationError(cause instanceof Error ? cause.message : 'Task could not be updated.') }
     finally { setBusy('') }
+  }
+  async function decide(analysisId: string, decision: 'approve' | 'reject') {
+    setDecisionError('')
+    if (decision === 'reject' && !reason.trim()) {
+      setDecisionError('Enter a rejection reason of 1–1,000 characters.'); document.getElementById('rejection-reason')?.focus(); return
+    }
+    setBusy('decision')
+    try {
+      await api(`/api/v1/requests/${id}/analyses/${analysisId}/decision`, 'POST', { decision, ...(decision === 'reject' ? { reason: reason.trim() } : {}) })
+      setReason(''); changed(decision === 'approve' ? 'Suggestions approved. Tasks saved.' : 'Suggestions rejected. No tasks created.')
+    } catch (cause) { setDecisionError(cause instanceof Error ? cause.message : 'Decision could not be saved.') }
+    finally { setBusy(''); setRetry(value => value + 1) }
   }
   return <><a className="text-link back-link" href="#requests">← All requests</a>
     {loading ? <p role="status" className="loading">Loading request…</p> : error ? <ErrorBox message={error} retry={() => setRetry(value => value + 1)} /> : detail && <>
@@ -155,12 +168,24 @@ function RequestDetail({ id, revision, changed }: { id: string; revision: number
         <dl className="detail-meta"><div><dt>Request ID</dt><dd>{detail.id}</dd></div><div><dt>Last updated</dt><dd>{date(detail.updated_at)}</dd></div></dl></article>
       <section className="panel"><div className="panel-heading"><div><h2>Analysis suggestions</h2>
         <p>{config ? config.provider_mode === 'simulated' ? 'Simulated mode · deterministic offline output' : `Real local model · Ollama ${config.provider_model}` : 'Analysis configuration unavailable'}</p></div>
-        {!detail.tasks.length && (!detail.analysis || detail.analysis.state === 'failed') && <button className="primary" disabled={!!busy || !config} onClick={() => void analyze()}>{busy === 'analysis' ? 'Analyzing… (up to 30 seconds)' : detail.analysis ? 'Retry analysis' : 'Analyze request'}</button>}</div>
+        {!detail.tasks.length && (!detail.analysis || ['failed', 'rejected'].includes(detail.analysis.state)) && <button className="primary" disabled={!!busy || !config} onClick={() => void analyze()}>{busy === 'analysis' ? 'Analyzing… (up to 30 seconds)' : detail.analysis ? 'Retry analysis' : 'Analyze request'}</button>}</div>
         {analysisError && <p className="error" role="alert">{analysisError} Refresh to check the saved outcome before retrying.</p>}
+        {decisionError && <p className="error" role="alert">{decisionError} Review the saved state before retrying.</p>}
         {detail.analysis && <><p>Saved attempt: {detail.analysis.provider_mode === 'simulated' ? 'Simulated' : `Real Ollama ${detail.analysis.provider_model}`} · {detail.analysis.state}</p>
           {detail.analysis.error_code && <p role="alert">Analysis failed: {detail.analysis.error_code}. No tasks were created.</p>}
-          {detail.analysis.proposal && <><p>{detail.analysis.proposal.summary}</p><p>Pending human review. Suggestions are inactive; approval is not available yet.</p>
+          <p>Analysis ID: {detail.analysis.id}</p>
+          {detail.analysis.decided_at && <p>Human decision recorded: {date(detail.analysis.decided_at)}</p>}
+          {detail.analysis.rejection_reason && <p>Rejection reason: {detail.analysis.rejection_reason}</p>}
+          {detail.analysis.proposal && <><p>{detail.analysis.proposal.summary}</p>
+            {detail.analysis.state === 'pending' && <p>Pending human review. Suggestions are inactive until approved.</p>}
+            {detail.analysis.state === 'rejected' && <p>Rejected suggestions are inactive. No tasks were created.</p>}
             <ul className="task-list">{detail.analysis.proposal.tasks.map((task, index) => <li className="task-item" key={index}><div><h3>{task.title}</h3><span className={`priority ${task.priority}`}>{task.priority} priority</span><p>{task.rationale}</p></div></li>)}</ul></>}
+          {detail.analysis.state === 'pending' && <div className="form-panel">
+            <p>Approve this complete suggestion set to create active tasks, or reject it with a reason.</p>
+            <label htmlFor="rejection-reason">Rejection reason</label><textarea id="rejection-reason" maxLength={1000} rows={3} value={reason} onChange={event => setReason(event.target.value)} disabled={!!busy} />
+            <div className="form-actions"><button className="primary" disabled={!!busy} onClick={() => void decide(detail.analysis!.id, 'approve')}>Approve suggestions</button>
+              <button className="secondary" disabled={!!busy} onClick={() => void decide(detail.analysis!.id, 'reject')}>Reject suggestions</button></div>
+          </div>}
         </>}
       </section>
       <section className="panel"><div className="panel-heading"><div><h2>Approved tasks</h2><p>Track saved work and update its progress.</p></div><span className="count-pill">{detail.tasks.length}</span></div>
