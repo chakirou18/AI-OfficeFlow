@@ -12,6 +12,8 @@ from urllib.error import HTTPError
 from urllib.request import HTTPCookieProcessor, Request, build_opener
 from uuid import uuid4
 
+from private_registry import IMAGE_REPOSITORIES
+
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / "artifacts/deployment"
 SCHEMA = "0006_human_decisions"
@@ -36,7 +38,7 @@ def validate_release(release, *, local=False):
             for key in ("ci_run", "release_run")):
         raise ValueError("Unverified schema compatibility or provenance")
     for service in ("api", "frontend"):
-        pattern = rf"ghcr\.io/chakirou18/ai-officeflow-{service}@sha256:[a-f0-9]{{64}}"
+        pattern = re.escape(IMAGE_REPOSITORIES[service]) + r"@sha256:[a-f0-9]{64}"
         if not (re.fullmatch(pattern, release[service]) or local and re.fullmatch(r"sha256:[a-f0-9]{64}", release[service])):
             raise ValueError("Only repository-owned immutable digests are accepted")
     return release

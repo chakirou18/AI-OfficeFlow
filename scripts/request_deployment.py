@@ -6,6 +6,7 @@ from pathlib import Path
 
 from deployment import REPOSITORY, validate_release
 from deployment_controller import api
+from private_registry import check_private_packages
 
 
 def main():
@@ -30,6 +31,7 @@ def main():
         if development["environment"] != "development" or not states or states[0]["state"] != "success":
             raise SystemExit("Successful development deployment required")
         release = validate_release(development["payload"]["release"])
+    check_private_packages()
     request = api("deployments", {"ref": release["commit"], "environment": args.environment,
         "auto_merge": False, "required_contexts": [], "production_environment": args.environment == "production",
         "payload": {"release": release, "request_run": int(os.environ["GITHUB_RUN_ID"])},
