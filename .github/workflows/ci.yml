@@ -51,7 +51,7 @@ jobs:
           python -m pip install --require-hashes -r requirements-test.lock
           python -m pip install ruff==0.14.0
       - name: Python lint
-        run: ruff check --select E9,F . ../scripts
+        run: ruff check --select E9,F . ../scripts ../agent-hooks
       - name: Unit tests
         run: python -m pytest tests/unit -v
       - name: Deployment safety tests (no deploy credentials)

@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T01-T16 delivered; T17/T18 remain.** T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
+**Status: T01-T16 delivered; T17 evidence complete, pending final protected delivery; T18 not started.** [Module 5 evidence](docs/module5-checklist.md) verifies all seven requirements, including one independent CLI subprocess reviewer (not native spawn_agent). T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
 
 ## Run locally
 

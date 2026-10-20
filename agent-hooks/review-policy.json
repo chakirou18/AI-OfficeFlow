@@ -1,0 +1,7 @@
+{
+  "role": "api_reviewer",
+  "actions": [
+    "read_fixture"
+  ],
+  "fixture_sha256": "be31b6b73f66f29f430d59bfd25fd97c90fd2dd32a6431021fb6c3147fb86d6c"
+}

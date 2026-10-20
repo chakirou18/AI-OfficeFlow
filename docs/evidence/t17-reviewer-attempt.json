@@ -1,0 +1,36 @@
+{
+  "source_commit": "3404eacad124f664f695dfdd02924ef336dab662",
+  "codex_cli_version": "0.163.0",
+  "authentication": "existing ChatGPT login",
+  "explicit_human_approval": true,
+  "authorized_supervisor_invocations": 1,
+  "executed_supervisor_invocations": 1,
+  "native_exit_code": 0,
+  "result": "unsupported_registered_agent_selection",
+  "subagent_invocations": 0,
+  "independent_review_performed": false,
+  "source_files_unchanged": true,
+  "synthetic_fixture_sha256": "be31b6b73f66f29f430d59bfd25fd97c90fd2dd32a6431021fb6c3147fb86d6c",
+  "event_counts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 2,
+    "turn.completed": 1
+  },
+  "item_type_counts": {
+    "agent_message": 2
+  },
+  "native_controls": [
+    "read-only sandbox",
+    "approval policy never",
+    "shell/apps/plugins/memories/permission requests disabled",
+    "no daemon",
+    "ephemeral",
+    "one concurrent subagent maximum"
+  ],
+  "supervisor_response": "UNSUPPORTED \u2014 the available agent interface cannot select or invoke the registered `api_reviewer` type. No subagent was invoked or substituted.\n\nNo review was performed, files changed, code executed, or application services accessed. Independent findings and an actual reviewer identity are therefore unavailable.",
+  "subagent_requirement_complete": false,
+  "integrated_demonstration_complete": false,
+  "retry_performed": false,
+  "generic_agent_substituted": false
+}
