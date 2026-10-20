@@ -1,0 +1,45 @@
+{
+  "supervisor_thread_id": "01a157dc-8282-7a80-b599-c7dd789836e9",
+  "launcher_exit_code": 0,
+  "source_files_unchanged": true,
+  "synthetic_fixture_sha256": "be31b6b73f66f29f430d59bfd25fd97c90fd2dd32a6431021fb6c3147fb86d6c",
+  "event_counts": {
+    "thread.started": 1,
+    "turn.started": 1,
+    "item.completed": 3,
+    "item.started": 1,
+    "turn.completed": 1
+  },
+  "collaboration_events": [
+    {
+      "id": "item_1",
+      "type": "collab_tool_call",
+      "tool": "wait",
+      "sender_thread_id": "01a157dc-8282-7a80-b599-c7dd789836e9",
+      "receiver_thread_ids": [],
+      "prompt": null,
+      "agents_states": {},
+      "status": "in_progress"
+    },
+    {
+      "id": "item_1",
+      "type": "collab_tool_call",
+      "tool": "wait",
+      "sender_thread_id": "01a157dc-8282-7a80-b599-c7dd789836e9",
+      "receiver_thread_ids": [],
+      "prompt": null,
+      "agents_states": {},
+      "status": "completed"
+    }
+  ],
+  "native_spawn_events": 0,
+  "verified_child_ids": [],
+  "result": "UNVERIFIED: supervisor claims a named reviewer and findings, but native child invocation/identity and independent findings are not proven.",
+  "automatic_retry_performed": false,
+  "artifact_sha256": {
+    "t17-reviewer-events.jsonl": "926e69a8630dc358ff86dc2f3d07021708803bf9a213cd3f7f6f26e193534916",
+    "t17-reviewer-final.md": "8f5f444cf29303b0621f558d5bbec2be5064b3105c09a4224fce97329b63de1c",
+    "t17-reviewer-stderr.txt": "08f31c947dcc31354905a1357625a4f87ba44a00cb5d048e512118416f4a2c45",
+    "t17-reviewer-invocation.json": "e65c86b6419296a220ba4ad25e9ab1c1e6783e867760f9bd0548a3815517ec0d"
+  }
+}

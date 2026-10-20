@@ -1,6 +1,17 @@
 # Permissions and security note
 
-Scope: small Zoomcamp final project, **synthetic demonstration data only**. No real business, customer records or external company systems. Authentication/API, bounded analysis/MCP, on-call and private delivery controls are implemented through T16. T17 adds the scoped coding-review workflow and executable guardrail; its actual specialized invocation requires separate authorization and execution evidence. Earlier company assumptions are retired.
+Verified T17 subprocess alternative: the
+[portable reviewer supervisor](../scripts/invoke_api_reviewer_process.py) maps the
+existing registered role instructions into one independent fresh CLI process.
+Native read-only/approval-never, disabled tools/delegation and isolated task
+context apply. After fresh explicit approval, exactly one reviewer ran in its own
+CLI session, emitted no tool items and left all 166 compared source files unchanged.
+See [actual execution evidence](evidence/t17-independent-reviewer.json) and the
+[boundaries](evidence/t17-subprocess-plan.md). No model supervisor or retry was used;
+the one-run approval is consumed. Historical native invocation evidence below
+remains unverified and unchanged.
+
+Scope: small Zoomcamp final project, **synthetic demonstration data only**. No real business, customer records or external company systems. Authentication/API, bounded analysis/MCP, on-call and private delivery controls are implemented through T16. T17 adds the scoped coding-review workflow and executable guardrail; its actual specialized invocation has separately authorized subprocess execution evidence. Earlier company assumptions are retired.
 
 Current boundary: local ports bind to 127.0.0.1; PostgreSQL has no published host port; generated configuration is ignored and the frontend has no database secret. Controlled demo accounts, password hashing, revocable sessions, expiry/lockout and CSRF/Origin protection guard app access. The frontend proxy excludes `/api/v1/ops`. Read-only diagnostics, exercise authorization and bounded on-call reset use three distinct scoped credentials. T15's [exercise gate](oncall-agent.md) is disabled by default and a new live exercise requires fresh explicit approval. T16's [actual deployments](deployment.md) are local-only; public exposure is not authorized.
 
@@ -13,7 +24,7 @@ If a credential is exposed, stop the affected action, report without repeating t
 | Identity | Minimum permission | Denied |
 | --- | --- | --- |
 | Main coding agent | Read project instructions/current issue; implement authorized source/tests/docs and use scoped GitHub workflow | Production mutations, real-model spend, new incidents or specialized invocation without explicit authorization; application task approval |
-| Registered `api_reviewer` | Supplied synthetic patch and review instructions; return findings to parent in a native read-only parent sandbox | File edits, shell/apps/plugins, application endpoints, task approval, deployment, further delegation or permission escalation |
+| Registered `api_reviewer` | Supplied synthetic patch and review instructions; return findings to the Python supervisor in a fresh read-only CLI process | File edits, shell/apps/plugins, application endpoints, task approval, deployment, further delegation or permission escalation |
 | Authenticated demo user | Create/view synthetic requests, request analysis, approve/reject and mark approved tasks done in the shared demo workspace | Private ops actions, secrets, arbitrary tools |
 | Analysis workflow/model | Read the supplied request and return schema-valid task/priority suggestions | Approve, create active tasks, shell, company integrations, operational repair |
 | Read-only MCP client | Bounded synthetic request summary through an allowlisted tool | SQL, arbitrary file/URL access, credentials or any mutation |
@@ -56,8 +67,8 @@ daemon, no shell/apps/plugins and at most one subagent. The reference is not a
 substitute for approval. The user subsequently approved one exact T17 supervisor
 invocation. It ran once with those controls and unchanged source hashes, but
 reported unsupported registered-agent selection and spawned no reviewer. The
-one-run approval is consumed; reviewer runtime enforcement/findings remain
-unverified. No retry or generic substitute is authorized. See the
+one-run approval is consumed; native reviewer execution remained unverified for that attempt; the later
+independent subprocess evidence above verifies the scoped review. No retry or generic substitute is authorized. See the
 [actual result](evidence/t17-reviewer-attempt.json).
 
 The [executable guardrail](../agent-hooks/README.md) has one fixed synthetic read

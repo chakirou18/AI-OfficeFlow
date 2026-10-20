@@ -17,5 +17,6 @@ oracle supplied to it. No business decision was approved.
 
 Disposition: reject this synthetic proposal pending corrections and the listed
 verification. The production implementation was not changed or evaluated by
-executing this candidate. Native reviewer invocation and its independent findings
-remain a separate requirement until explicit authorization and real execution.
+executing this candidate. At the time of this review, independent execution remained pending. The later
+[actual subprocess findings](t17-independent-findings.md) and
+[process evidence](t17-independent-reviewer.json) satisfy that separate step.

@@ -10,9 +10,27 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACTS = ROOT / "artifacts"
+ARTIFACTS = ROOT / "artifacts/t17-reviewer-retry"
+
+
+def reviewer_command():
+    """Pin the existing named role without loading unrelated user integrations."""
+    registration = ROOT / ".codex/agents/api-reviewer.toml"
+    role = tomllib.loads(registration.read_text(encoding="utf-8"))
+    if role.get("name") != "api_reviewer" or not role.get("developer_instructions"):
+        raise ValueError("Invalid registered reviewer identity/instructions")
+    return ["codex", "--no-daemon", "--sandbox", "read-only", "--ask-for-approval", "never",
+            "--disable", "shell_tool", "--disable", "apps", "--disable", "plugins",
+            "--disable", "memories", "--disable", "request_permissions_tool",
+            "--enable", "multi_agent",
+            "-c", "agents.max_concurrent_threads_per_session=1",
+            "-c", "agents.max_depth=1",
+            "-c", "agents.api_reviewer.config_file=" + json.dumps(registration.as_posix()),
+            "exec", "--ignore-user-config", "--ephemeral", "--json",
+            "--output-last-message", str(ARTIFACTS / "t17-reviewer-final.md"), "-"]
 
 
 def source_snapshot():
@@ -25,11 +43,22 @@ def source_snapshot():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--approval-reference", required=True,
+    parser.add_argument("--check-config", action="store_true",
+                        help="Validate registration and print command only; starts no Codex process")
+    parser.add_argument("--approval-reference",
                         help="Reference to actual explicit approval of this single invocation")
     args = parser.parse_args()
+    command = reviewer_command()
+    if args.check_config:
+        print(json.dumps({"command": command, "model_turns_started": 0,
+                          "note": "Static validation only; native discovery/spawn not demonstrated."}))
+        return
+    if args.approval_reference is None:
+        parser.error("--approval-reference is required for an actual invocation")
     if not 1 <= len(args.approval_reference.strip()) <= 500:
         parser.error("A bounded reference to real human approval is required")
+    if ARTIFACTS.exists():
+        parser.error("Retry evidence directory already exists; preserve it and stop")
     guard_path = ROOT / "agent-hooks/review_guard.py"
     spec = importlib.util.spec_from_file_location("review_guard", guard_path)
     guard = importlib.util.module_from_spec(spec)
@@ -57,13 +86,7 @@ Canonical skill instructions:
 Actual guarded review input:
 {json.dumps(review_input)}
 """
-    ARTIFACTS.mkdir(exist_ok=True)
-    command = ["codex", "--no-daemon", "--sandbox", "read-only", "--ask-for-approval", "never",
-               "--disable", "shell_tool", "--disable", "apps", "--disable", "plugins",
-               "--disable", "memories", "--disable", "request_permissions_tool",
-               "-c", "agents.max_concurrent_threads_per_session=1",
-               "exec", "--ignore-user-config", "--ephemeral", "--json",
-               "--output-last-message", str(ARTIFACTS / "t17-reviewer-final.md"), "-"]
+    ARTIFACTS.mkdir(parents=True)
     before = source_snapshot()
     try:
         result = subprocess.run(command, input=prompt.encode(), capture_output=True, cwd=ROOT, timeout=240)
