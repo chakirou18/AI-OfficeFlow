@@ -37,4 +37,4 @@ The [Module 5 checklist](module5-checklist.md) retains all seven requirements; t
 - T15 completed the exact authorized dev incident and one narrow automatic repair; repeat authorization is required.
 - T17 completed the separately authorized independent reviewer process and reused the custom on-call agent; native spawn attempts remain unverified.
 
-**Current: T18 handover review preparation.** T17 PR #35 is merged. Preserve historical evidence; do not rerun the reviewer, incident, model evaluation or deployment controller. Keep #18 open until its remaining acceptance gates are verified. See [final-handover.md](final-handover.md).
+**Current: T18 verified-evidence review.** [Recovered local evidence](evidence/t18-validation.md) confirms 190 backend and 15 browser tests plus restart persistence on clean source with cached dependencies. Cold installation remains unverified; three course review confirmations remain missing. T17 PR #35 is merged. Preserve historical evidence; do not rerun the reviewer, incident, model evaluation or deployment controller. Keep #18 open until its remaining acceptance gates are verified. See [final-handover.md](final-handover.md).

@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T01-T17 delivered; T18 evidence handover prepared, with clean-source runtime verification and three course peer-review confirmations outstanding.** See the [final handover](docs/final-handover.md) and [implementation map](docs/implementation-map.md). [Module 5 evidence](docs/module5-checklist.md) verifies all seven requirements, including one independent CLI subprocess reviewer (not native spawn_agent). T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
+**Status: T01-T17 delivered; T18 evidence handover prepared, with verified clean-source execution using cached dependencies; three course peer-review confirmations remain outstanding. A cold installation is not verified.** See the [final handover](docs/final-handover.md) and [implementation map](docs/implementation-map.md). [Module 5 evidence](docs/module5-checklist.md) verifies all seven requirements, including one independent CLI subprocess reviewer (not native spawn_agent). T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ docker compose --profile test run --build --rm test
 python scripts/verify_persistence.py
 ```
 
-Historical T13 local results: **149 backend tests passed** against isolated PostgreSQL and **15 browser checks passed** in installed Edge. T13 independently verified application records survived an API restart and stored signals were queryable. [Grafana](http://127.0.0.1:3000) uses a separate private monitoring login; see [observability](docs/observability.md), [tests](docs/testing.md) and Issue #13 for evidence.
+Recovered [T18 validation](docs/evidence/t18-validation.md): **190 backend tests (105 unit / 85 integration)** and **15 browser tests passed** on `1024ed5`; clean-source cached-dependency setup and restart persistence verified. Historical T13 local results: **149 backend tests passed** against isolated PostgreSQL and **15 browser checks passed** in installed Edge. T13 independently verified application records survived an API restart and stored signals were queryable. [Grafana](http://127.0.0.1:3000) uses a separate private monitoring login; see [observability](docs/observability.md), [tests](docs/testing.md) and Issue #13 for evidence.
 
 ## Problem and expected behavior
 

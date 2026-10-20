@@ -1,6 +1,6 @@
 # T16 private release deployment
 
-Current status: T16 completed through PR #34. The chronology below preserves intermediate blockers and their later resolution. Final delivery/recovery is recorded under **Completed manual production promotion and acceptance evidence**. Docker is unavailable during the initial T18 audit, so historical localhost reachability is not claimed current; see [handover](final-handover.md).
+Current status: T16 completed through PR #34. The chronology below preserves intermediate blockers and their later resolution. Final delivery/recovery is recorded under **Completed manual production promotion and acceptance evidence**. Docker was unavailable during the initial T18 audit; it was subsequently started for an isolated test project, which was stopped after validation. Existing T16 stacks stayed stopped, so historical localhost reachability is not claimed current; see [handover](final-handover.md).
 
 Status: **all four T16 acceptance criteria verified on 2026-10-20**. Actual
 automatic private development and manual production delivery succeeded using the

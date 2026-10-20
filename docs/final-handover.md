@@ -5,8 +5,7 @@ Audited application source: `6a6098f6baa36e3b49b2dfdaacc721981237f102`,
 the verified merge of [T17 PR #35](https://github.com/chakirou18/AI-OfficeFlow/pull/35).
 Initial local main and remote main matched; the working tree was clean.
 Dependencies T02, T12, T15, T16 and T17 were read and confirmed closed.
-T18 remains open: current clean-source runtime validation and three course review
-confirmations are outstanding. No grading score or course submission is claimed.
+Subsequent local validation tested documentation head `1024ed57a80df8ba59a8acebb7a0af97379be813` with unchanged application source. T18 remains open: three course review confirmations are outstanding. Clean-source cached-dependency execution passed; cold installation remains unverified. No grading score or course submission is claimed.
 
 ## Product and architecture
 
@@ -26,7 +25,7 @@ specified external condition prevents verification.
 
 ## Technical validation
 
-New T18 checks on the audited source, using existing installed tools only:
+Initial T18 checks below were run before Docker authorization; their blocked observations are historical and superseded by the recovered execution summary that follows:
 
 | Command/check | Observed result | Timing and limit |
 | --- | --- | --- |
@@ -38,8 +37,38 @@ New T18 checks on the audited source, using existing installed tools only:
 | Initial main CI | [39382640382](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39382640382), both required jobs success at audited SHA | Backend checks 107 s; Frontend checks 7 s; hosted execution, not local tests |
 
 Installed tools observed: Windows PowerShell, Python 3.12.10, Node 24.19.0,
-npm 11.17.0, Docker client 29.9.1 and Compose v5.6.0. No running Docker server
-version could be measured. No dependency, model or runtime was installed.
+npm 11.17.0, Docker client 29.9.1 and Compose v5.6.0. The initial audit could not
+measure a server version. After authorization, Engine 29.9.1 Linux, container
+Python 3.12.15 and PostgreSQL 17.11 were observed. No dependency, model or runtime was installed.
+
+### Recovered authorized local execution
+
+[Sanitized evidence](evidence/t18-validation.md) and [machine-readable commands/results](evidence/t18-validation.json)
+record the actual execution on clean exported source `1024ed5`. Logs/exit codes
+were recovered after interruption; successful suites were not rerun.
+
+| Check | Actual result |
+| --- | --- |
+| Backend / real PostgreSQL | 105 unit + 85 integration = **190 passed**; 83.95 s pytest, 91.906 s command, exit 0 |
+| Browser / installed Edge | **15 passed**; 14.5 s Playwright, 15.516 s command, exit 0 |
+| Frontend lint / typechecked build | Exit 0; 2.547 s / 2.172 s |
+| Migrations | `0006_human_decisions`; no drift; exit 0 |
+| Startup / loopback correction | 29.187 s initial services; 15.875 s corrected edge startup, not another cold boot |
+| HTTP readiness | HTTP 200, 0.031 s |
+| Restart persistence | 17 requests / 5 analyses / 5 tasks; unchanged complete-row hashes, 4.312 s |
+| Preservation | 172 source files unchanged; all baseline volumes, image tags/IDs and container IDs retained |
+
+The invalid first `run --no-build` command failed before pytest. Initial internal-only
+networking blocked host ports; a temporary loopback edge corrected it. A console
+encoding error occurred after the successful frontend build. All are preserved in
+the evidence. Cached dependencies/read-only source mounts were used; this is not
+a verified cold install or unmodified Dockerfile rebuild. Only the temporary stack
+was stopped afterward; its named volumes were retained.
+
+Prior-head [CI 39385688527](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39385688527)
+passed on `1024ed5` (Backend 120 s, Frontend 15 s). The [PR checks](https://github.com/chakirou18/AI-OfficeFlow/pull/36/checks)
+and final evidence comment in [Issue #18](https://github.com/chakirou18/AI-OfficeFlow/issues/18)
+record delivery CI for the later documentation head; old CI is not its substitute.
 
 Historical checks reused, not rerun:
 
@@ -78,8 +107,7 @@ development 7/0/7 and production 3/0/3 request/task/run counts at schema
 `0006_human_decisions`. No live restore-over or downgrade occurred.
 
 These are actual localhost deployments with recordings, not public hosting.
-The foreground controller was stopped after T16. Current Docker unavailability
-means the recorded apps are not claimed reachable during T18. Later successful
+The foreground controller was stopped after T16. Docker was later started only for the isolated T18 validation; existing release stacks stayed stopped. Their recorded availability is not claimed current. Later successful
 release workflows can enqueue requests without deploying them; initial-main
 [release 39382827351](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39382827351)
 is not evidence that its source was applied by a running controller.
@@ -94,7 +122,7 @@ Telemetry retention is seven days; live historical data is not guaranteed to rem
 ## Demonstration and submission
 
 1. Present the README scope and the implementation map; show the simulated mode label.
-2. Once Docker is available, follow the isolated setup guide. Create a controlled
+2. Follow the isolated cached-dependency setup guide, checking Docker and prerequisites first. Create a controlled
    account locally; never show its password, session or configuration.
 3. Create a synthetic request, analyze, inspect the pending proposal, approve as a
    human and reload the saved tasks/dashboard. Use a second request to show rejection
@@ -126,8 +154,17 @@ deadline or platform button name is invented.
 
 ## Remaining gates and limitations
 
-- BLOCKED: Docker engine availability and permission to start it before current
-  clean-source startup/backend/browser timing evidence can be completed.
+| Issue #18 acceptance criterion | Evidence assessment |
+| --- | --- |
+| Twelve grading criteria and seven Module 5 requirements | VERIFIED evidence coverage, with historical provenance and limitations; no awarded score |
+| Versioned startup/tests/CI/delivery/telemetry/alert/repair demonstrations | VERIFIED evidence exists across the identified T13-T18 commits; CI is not deployment |
+| Clean checkout and measured smoke timings | VERIFIED for the documented clean-source cached-dependency procedure; cold installation/unmodified cold build NOT VERIFIED |
+| Three distinct course-assigned peer reviews | BLOCKED: three actual submission confirmations remain unavailable |
+
+These assessments do not automatically check issue boxes, approve the PR or close
+T18. Maintainer review and the missing course confirmations remain required.
+
+- VERIFIED: clean-source execution with cached dependencies and a temporary isolated override. NOT VERIFIED: cold dependency installation or an unmodified cold Docker build; missing prerequisites require separate download approval.
 - BLOCKED: three genuine course-assigned review confirmations.
 - PR required checks must pass on its final head; do not infer this from initial-main CI.
 - Public application hosting, continuous availability, new live model calls,

@@ -2,7 +2,7 @@
 
 The existing public [tracker](https://github.com/chakirou18/AI-OfficeFlow/issues) retains **T01-T18 / issues #1-#18**, their history, milestones and links. The Zoomcamp-only scope supersedes the company/enterprise backlog. Earlier criteria are preserved in Git/issue history; the table and scope-revision comments define current acceptance. No runtime work is completed by changing a criterion.
 
-T01-T17 are completed with issue/PR evidence. T18 is open; GitHub remains authoritative for live states. [Final handover](final-handover.md) records missing current clean-source runtime validation and three course review confirmations.
+T01-T17 are completed with issue/PR evidence. T18 is open; GitHub remains authoritative for live states. [Final handover](final-handover.md) records verified clean-source cached-dependency execution, an unverified cold-install path, and three missing course review confirmations.
 
 ## Labels and status workflow
 
@@ -41,4 +41,4 @@ The single request-analysis agent replaces Sales/Coordination agents. Synchronou
 
 A01-A06 are retired in the specification. No company validation or commercial performance requirement remains. No original issue is deleted or duplicated; renamed tasks keep their stable IDs. Evidence before this revision remains valid for the documentary/setup work it actually demonstrates.
 
-**Current: T18 handover review preparation.** T17 PR #35 is merged. Preserve historical evidence; do not rerun the reviewer, incident, model evaluation or deployment controller. Keep #18 open until its remaining acceptance gates are verified. See [final-handover.md](final-handover.md).
+**Current: T18 verified-evidence review.** [Recovered local evidence](evidence/t18-validation.md) confirms 190 backend and 15 browser tests plus restart persistence on clean source with cached dependencies. Cold installation remains unverified; three course review confirmations remain missing. T17 PR #35 is merged. Preserve historical evidence; do not rerun the reviewer, incident, model evaluation or deployment controller. Keep #18 open until its remaining acceptance gates are verified. See [final-handover.md](final-handover.md).

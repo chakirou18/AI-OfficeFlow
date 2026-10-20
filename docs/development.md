@@ -1,6 +1,6 @@
 # Local development guide
 
-Scope: implemented application, telemetry, alerting, bounded on-call and delivery through T17. See [T18 clean-source validation](t18-clean-checkout.md) for current environment blockers; versioned sections below retain incremental history, and later sections supersede earlier slice limitations. Keep Compose local. See [observability setup](observability.md), [test commands](testing.md) and the API sections below; historical T04-only evidence remains separate.
+Scope: implemented application, telemetry, alerting, bounded on-call and delivery through T17. See [T18 clean-source validation](t18-clean-checkout.md) for the verified cached-dependency procedure and cold-install limitation; versioned sections below retain incremental history, and later sections supersede earlier slice limitations. Keep Compose local. See [observability setup](observability.md), [test commands](testing.md) and the API sections below; historical T04-only evidence remains separate.
 
 ## Prerequisites and configuration
 

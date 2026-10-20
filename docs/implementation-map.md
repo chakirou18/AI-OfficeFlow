@@ -1,6 +1,6 @@
 # Implemented architecture audit
 
-Read against source `6a6098f6baa36e3b49b2dfdaacc721981237f102` on 2026-10-20.
+Read against source `6a6098f6baa36e3b49b2dfdaacc721981237f102` on 2026-10-20. The later documentation-only head `1024ed57a80df8ba59a8acebb7a0af97379be813` was verified with [190 backend tests, 15 browser tests and restart persistence](evidence/t18-validation.md). No application changes occurred between these commits.
 [ADR 0010](adr/0010-minimal-zoomcamp-scope.md) remains the architectural decision.
 This map distinguishes actual entry points from development instructions.
 

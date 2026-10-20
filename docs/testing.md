@@ -1,5 +1,14 @@
 # T12 test coverage and commands
 
+Current [T18 evidence](evidence/t18-validation.md), tested commit `1024ed5`:
+**190 backend tests (105 unit / 85 integration), 83.95 s pytest / 91.906 s command**;
+**15 Edge tests, 14.5 s Playwright / 15.516 s command**. Both commands exited 0.
+Frontend lint (2.547 s), typechecked build (2.172 s), migration head/no drift and
+full-row restart persistence (4.312 s) passed. See [exact isolated commands](t18-clean-checkout.md).
+The unsupported initial `compose run --no-build` invocation failed before tests;
+its corrected invocation passed. Existing dependency images/packages were reused,
+not freshly installed. Results were recovered from saved logs, not rerun for publication.
+
 Historical T12 baseline below. Later T15 evidence records 188 backend tests (81.22 s); current T18 checks and their limits are in [final-handover.md](final-handover.md). No historical result is a fresh T18 run.
 
 Scope: synthetic request/analysis/human-decision functionality through T11.
