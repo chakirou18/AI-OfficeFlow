@@ -4,6 +4,7 @@ import json
 import time
 
 from deployment import Deployment, ENVIRONMENTS, REPOSITORY, STATE, run, validate_release
+from private_registry import check_private_packages
 
 
 def api(path, body=None):
@@ -77,6 +78,7 @@ def poll_once():
                 continue
             try:
                 release = verify_request(request)
+                check_private_packages()
                 # Record in_progress before action; an interrupted process never
                 # blindly retries an already-started deployment.
                 status(identifier, "in_progress")

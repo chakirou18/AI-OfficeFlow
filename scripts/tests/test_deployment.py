@@ -13,8 +13,8 @@ from deployment_controller import verify_request
 
 
 def release():
-    return {"commit": "a" * 40, "api": "ghcr.io/chakirou18/ai-officeflow-api@sha256:" + "b" * 64,
-            "frontend": "ghcr.io/chakirou18/ai-officeflow-frontend@sha256:" + "c" * 64,
+    return {"commit": "a" * 40, "api": "ghcr.io/chakirou18/ai-officeflow-private-api@sha256:" + "b" * 64,
+            "frontend": "ghcr.io/chakirou18/ai-officeflow-private-frontend@sha256:" + "c" * 64,
             "compatible_revisions": [deployment.SCHEMA], "ci_run": 10, "release_run": 20}
 
 
@@ -23,6 +23,7 @@ class ReleaseSafety(unittest.TestCase):
         deployment.validate_release(release())
         for key, value in [("api", "ghcr.io/chakirou18/ai-officeflow-api:latest"),
                            ("frontend", "ghcr.io/other/frontend@sha256:" + "b" * 64),
+                           ("api", "ghcr.io/chakirou18/ai-officeflow-api@sha256:" + "b" * 64),
                            ("commit", "main"), ("ci_run", True), ("compatible_revisions", ["unverified"])]:
             with self.subTest(key=key):
                 with self.assertRaises(ValueError):

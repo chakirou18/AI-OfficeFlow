@@ -97,9 +97,120 @@ results and digests. Keep the PC awake for automatic deployments; this local
 fallback has no availability guarantee. No public URL is claimed; record the
 running authenticated local application for the permitted deployment-demo option.
 
-Bootstrap limitation: `workflow_run`/new manual workflows must exist on the default
-branch before GitHub can trigger them. With the user's “no T16 merge until all
-criteria pass” rule, activation cannot be demonstrated from an unmerged draft.
-Request explicit permission for a reviewed delivery-bootstrap merge while keeping
-Issue #16 open; do not silently override that gate. Until then, automatic dev and
-manual GitHub production evidence remain unchecked, regardless of local rehearsal.
+## Authorized bootstrap and actual delivery evidence
+
+On 2026-10-20 the user explicitly authorized the reviewed bootstrap merge,
+foreground-only local controller and private GHCR authentication. Public exposure,
+paid hosting, background services/runners and volume deletion remain prohibited.
+[PR #31](https://github.com/chakirou18/AI-OfficeFlow/pull/31) merged as
+`49e0e786321f24231cebae286153d18b365b4afc` after both required checks passed
+on reviewed head `38796670d968b2f33ef38643443f0b622175c96a`
+([PR CI](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39323714031)).
+Local main was fast-forwarded. Strict Backend checks/Frontend checks and
+administrator enforcement were inspected and preserved.
+
+[Main CI 39366769002](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39366769002)
+passed and automatically triggered
+[Release development 39366948112](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39366948112).
+A triggered workflow is not deployment success. Private GHCR read authorization
+was pending at that point and later completed; actual development delivery and
+manual production promotion remain unverified. Issue #16 remains open.
+
+Existing private recordings are `artifacts/t16-development.webm` and
+`artifacts/t16-production.webm`, indexed by `artifacts/t16-recording.json`.
+They show the previous actual local rehearsal, not the new hosted release.
+`artifacts/t16-rehearsal.json` records separate credentials/databases, isolated
+restore counts (development 6/0/6, production 1/0/1 for requests/tasks/runs),
+schema `0006_human_decisions`, compatible rollback/forward recovery and retention
+of the healthy previous release after a failed migration candidate. These
+historical results are not newly executed checks or GHCR digest attestations.
+Demo access instructions remain the private per-environment `demo-login.json`;
+recordings and credentials are not published. Access is local-only at
+`http://127.0.0.1:18080` and `http://127.0.0.1:28080`.
+
+The release workflow subsequently **passed**, including exact-image authenticated
+runtime smoke and isolated restore, and created development request `7191157555`.
+This is a pending request, not a successful local deployment. Published manifest:
+
+- API: `ghcr.io/chakirou18/ai-officeflow-api@sha256:7fdcba0d717e33e78759aa6ee9672aad447803ac900d04a40ebfc1516767bb3c`
+- Frontend: `ghcr.io/chakirou18/ai-officeflow-frontend@sha256:1fbf0229fea4a9dfb0dd06b8dab21ff72449dd909d06ea174f0c6a6abaab0510`
+
+The initial package visibility was not verified at publication time; later
+inspection found public packages (see the blocker and correction below). The controller has not started; production promotion has
+not been dispatched. No deployment success is claimed.
+
+## Registry visibility blocker (2026-10-20)
+
+GitHub CLI refresh completed and `read:packages` is now present. Authenticated
+package metadata inspection unexpectedly returned `visibility: public` for both
+`ai-officeflow-api` and `ai-officeflow-frontend` (created at 03:57:47Z and
+03:57:51Z). This violates the user's private-only requirement; private publishing
+is **not demonstrated**. The cause of the visibility change is unconfirmed.
+GitHub documents that public packages cannot be made private again:
+https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility
+
+The controller remains stopped, development request `7191157555` remains pending,
+and production promotion has not been dispatched. No registry deletion was performed. The earlier delete/recreate proposal is
+superseded by the user-authorized non-destructive new-name correction below.
+No package, Docker volume or deployment data deletion is authorized. T16 stays open.
+
+## Verified non-destructive private package correction
+
+The user authorized evaluating/publishing the already-tested images under new
+private names and preparing a focused branch, with **no additional merge or
+deployment activation**. `fix/t16-private-registry` is review-only until explicitly
+approved. Existing public packages and all deployment/telemetry data are preserved.
+
+GitHub documents that new personal packages default to private and repository
+access inheritance does **not** inherit visibility. Actual registry checks confirmed
+both new packages are private while linked to `chakirou18/AI-OfficeFlow`:
+[GitHub package access and visibility](https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility).
+Authenticated immutable pulls succeeded; anonymous manifest access was denied
+for both. This verifies current privacy, not a guarantee against later maintainer
+visibility changes. Public copies of these same images remain publicly available;
+new private names cannot retract that prior publication.
+
+The copy used Docker tag/push of the already-tested images, **no build**, preserving
+source labels. Source provenance remains the successful main CI `39366769002`,
+release `39366948112`, source commit `49e0e786321f24231cebae286153d18b365b4afc`
+and original deployment request `7191157555`; it is not replaced by the correction
+branch's CI. Raw source/destination registry manifest bytes and their computed
+SHA-256 hashes matched exactly, including all config/layer descriptors:
+
+| Service | New private immutable reference | Image config digest |
+| --- | --- | --- |
+| API | `ghcr.io/chakirou18/ai-officeflow-private-api@sha256:7fdcba0d717e33e78759aa6ee9672aad447803ac900d04a40ebfc1516767bb3c` | `sha256:a2d982961468cb688b38e48421b3ba3ab5ba11101e6657cb507bd3afdff7a042` |
+| Frontend | `ghcr.io/chakirou18/ai-officeflow-private-frontend@sha256:1fbf0229fea4a9dfb0dd06b8dab21ff72449dd909d06ea174f0c6a6abaab0510` | `sha256:60390adc8c5aa6e7723c53eec54c79d0132ea30b8d36fbeed59798d0dba1666a` |
+
+Full per-layer comparisons and privacy observations are saved locally in ignored
+`artifacts/t16-private-copy-proof.json`; `python artifacts/t16_copy_private.py`
+completed successfully. It is a one-time fixed copy, not a deployment tool, and
+refuses to overwrite pre-existing destination packages. No credentials are stored
+in that script or report; authentication was passed only through captured stdin.
+
+The correction changes only fixed image destinations and adds fail-closed private
+package/repository-link checks before building/pushing, before requesting either
+environment, and before controller deployment. Packages must already exist and be
+private; missing/inaccessible/public/wrong-repository metadata stops the operation.
+Digest selection matches the specific destination instead of assuming the first
+Docker RepoDigests entry. Old public references are rejected for new deployments.
+Existing fixed controller operations, trusted-main CI/workflow provenance checks,
+manual production promotion, schema compatibility and rollback/database isolation
+remain in place. No Compose, database or migration configuration changed.
+
+Copy verification is **not deployment evidence**. No deployment request was edited,
+no state file was rewritten, and the controller remains stopped. The pending public
+request is not converted into a successful private deployment. Once a reviewed
+correction is explicitly approved and merged, a fresh trusted-main CI/release must
+produce a new genuine deployment request. Normal future releases still build/test
+their own commit; the two copies above retain their original commit provenance.
+The existing main/SHA protections are not relaxed to deploy stale images.
+
+Validation: `python -m unittest discover -s scripts/tests -v` passed (12 tests),
+including private visibility failure cases, obsolete public-reference rejection,
+destination-specific digest selection, existing provenance and isolation guards.
+Required PR CI remains `Backend checks` and `Frontend checks`; exact results are
+recorded in Issue #16 and the correction PR. Runtime port inspection confirmed
+only `127.0.0.1:18080` / `127.0.0.1:28080` are published for release services;
+APIs/databases have no host ports. No new automatic dev or manual production
+delivery has been demonstrated. Issue #16 stays open; T17/T18 not started.
