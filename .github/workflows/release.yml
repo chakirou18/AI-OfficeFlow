@@ -1,0 +1,63 @@
+name: Release development
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: release-development
+  cancel-in-progress: false
+jobs:
+  release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: development
+      deployment: false
+    permissions:
+      contents: read
+      packages: write
+      deployments: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      CI_RUN: ${{ github.event.workflow_run.id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Confirm current trusted main
+        run: test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" = "$RELEASE_SHA"
+      - name: Build immutable runtime candidates
+        run: |
+          docker build --target runtime --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" -t "ghcr.io/chakirou18/ai-officeflow-api:$RELEASE_SHA" backend
+          docker build --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" -t "ghcr.io/chakirou18/ai-officeflow-frontend:$RELEASE_SHA" frontend
+      - name: Test the exact images before publishing
+        run: |
+          API_IMAGE="$(docker image inspect "ghcr.io/chakirou18/ai-officeflow-api:$RELEASE_SHA" --format '{{.Id}}')"
+          FRONTEND_IMAGE="$(docker image inspect "ghcr.io/chakirou18/ai-officeflow-frontend:$RELEASE_SHA" --format '{{.Id}}')"
+          export API_IMAGE FRONTEND_IMAGE
+          python -c 'import json,os; json.dump(dict(commit=os.environ["RELEASE_SHA"],api=os.environ["API_IMAGE"],frontend=os.environ["FRONTEND_IMAGE"],compatible_revisions=["0006_human_decisions"],ci_run=int(os.environ["CI_RUN"]),release_run=int(os.environ["GITHUB_RUN_ID"])),open("candidate.json","w"))'
+          python scripts/deployment.py apply development --local-rehearsal --isolated-ci --release candidate.json
+          python scripts/deployment.py restore-smoke development --isolated-ci
+      - name: Publish the tested candidates and request development deployment
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "ghcr.io/chakirou18/ai-officeflow-api:$RELEASE_SHA"
+          docker push "ghcr.io/chakirou18/ai-officeflow-frontend:$RELEASE_SHA"
+          API_IMAGE="$(docker image inspect "ghcr.io/chakirou18/ai-officeflow-api:$RELEASE_SHA" --format '{{index .RepoDigests 0}}')"
+          FRONTEND_IMAGE="$(docker image inspect "ghcr.io/chakirou18/ai-officeflow-frontend:$RELEASE_SHA" --format '{{index .RepoDigests 0}}')"
+          export API_IMAGE FRONTEND_IMAGE
+          python -c 'import json,os; p=json.load(open("candidate.json")); p.update(api=os.environ["API_IMAGE"],frontend=os.environ["FRONTEND_IMAGE"]); json.dump(p,open("release.json","w"))'
+          python scripts/request_deployment.py development --release release.json

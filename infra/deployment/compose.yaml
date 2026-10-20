@@ -1,0 +1,55 @@
+# Isolated loopback release environments. No builds, fault flags or ops credentials.
+services:
+  db:
+    image: postgres@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    environment: &database
+      POSTGRES_USER: officeflow
+      POSTGRES_DB: ${DEPLOY_DATABASE:?}
+      POSTGRES_PASSWORD: ${DEPLOY_PASSWORD:?}
+    volumes: [database:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U officeflow -d $$POSTGRES_DB']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  migrate:
+    image: ${API_IMAGE:?}
+    environment:
+      <<: *database
+      POSTGRES_HOST: db
+    command: [alembic, upgrade, head]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    image: ${API_IMAGE:?}
+    environment:
+      <<: *database
+      POSTGRES_HOST: db
+      APP_ENV: ${DEPLOY_ENVIRONMENT:?}
+      APP_ORIGINS: http://127.0.0.1:${DEPLOY_PORT:?}
+      COOKIE_SECURE: 'false'
+      MODEL_MODE: simulated
+      ENABLE_DEV_FAULTS: 'false'
+      ENABLE_ONCALL_EXERCISE: 'false'
+      TELEMETRY_ENABLED: ${DEPLOY_TELEMETRY:-true}
+      TELEMETRY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT:?}
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready',timeout=4)"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+  frontend:
+    image: ${FRONTEND_IMAGE:?}
+    ports: ['127.0.0.1:${DEPLOY_PORT:?}:8080']
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/healthz]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+volumes:
+  database:
