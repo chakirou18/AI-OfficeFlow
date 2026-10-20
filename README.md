@@ -2,7 +2,7 @@
 
 AI OfficeFlow is a small **AI-assisted request and task manager** built exclusively for the **DataTalksClub AI Dev Tools Zoomcamp 2026 final project**. The target is demonstrable coverage of all **12 official criteria / 24 available points**, not a commercial platform. No grading points are claimed.
 
-**Status: T01-T12 merged; T13 stored observability verified locally.** The application now exports correlated metrics, traces and structured events to the local monitoring stack. [Observability setup/evidence](docs/observability.md) records actual queries and Grafana navigation. Local checks: 149 backend and 15 browser tests. Issue #13 records required CI/merge evidence. Alerting, deployment and later tasks remain unfinished; no grading points are claimed.
+**Status: T01-T16 delivered; T17/T18 remain.** T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
 
 ## Run locally
 
@@ -19,7 +19,7 @@ Then start the application and local observability stack with one command:
 docker compose up --build
 ```
 
-Create a controlled account using the command below, open [http://127.0.0.1:8080](http://127.0.0.1:8080), sign in, and use the dashboard or request register. Open **System health** and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL and operations routes are excluded from the frontend proxy. Public HTTPS deployment remains T16.
+Create a controlled account using the command below, open [http://127.0.0.1:8080](http://127.0.0.1:8080), sign in, and use the dashboard or request register. Open **System health** and click **Save synthetic check** to verify UI → API → PostgreSQL → UI. API docs: [http://127.0.0.1:8000/api/docs](http://127.0.0.1:8000/api/docs). Only loopback ports are published; PostgreSQL and operations routes are excluded from the frontend proxy. T16 uses [private localhost release environments](docs/deployment.md); public HTTPS hosting is not authorized.
 
 ```powershell
 docker compose --profile test run --build --rm test
@@ -83,7 +83,7 @@ All seven Module 5 Agent Extension Pack requirements remain required; Module 5 h
 CI runs backend lint/unit/PostgreSQL integration tests and frontend lint/typechecked
 builds on pull requests and main. Both jobs are required for merging. See
 [CI workflow](.github/workflows/ci.yml) and [CI commands](docs/development.md#continuous-integration-t05).
-Deployment automation remains T16.
+Actual T16 automatic development and manual production delivery is recorded in [deployment evidence](docs/deployment.md).
 
 Controlled demo login is now required for the foundation write/read flow. Create accounts
 from a trusted terminal with `docker compose exec api python -m app.manage_users create demo_user`.

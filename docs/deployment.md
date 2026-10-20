@@ -1,8 +1,10 @@
 # T16 private release deployment
 
-Status: implementation and local rehearsal. Automatic main deployment and manual
-GitHub production promotion are **not yet demonstrated**. Do not close T16 from
-image builds, request creation, a passing CI run or a manual local rehearsal.
+Status: **all four T16 acceptance criteria verified on 2026-10-20**. Actual
+automatic private development and manual production delivery succeeded using the
+same tested digests. These are local-only synthetic release environments, not
+public hosting. The foreground controller was stopped after the demonstration;
+apps remain running. Earlier preparation/blocker sections are historical evidence.
 
 ## Architecture
 
@@ -214,3 +216,120 @@ recorded in Issue #16 and the correction PR. Runtime port inspection confirmed
 only `127.0.0.1:18080` / `127.0.0.1:28080` are published for release services;
 APIs/databases have no host ports. No new automatic dev or manual production
 delivery has been demonstrated. Issue #16 stays open; T17/T18 not started.
+
+## Actual automatic private delivery (2026-10-20)
+
+The user authorized merging reviewed PR #32, foreground controller activation,
+private GHCR authentication, automatic development and manual production delivery.
+[PR #32](https://github.com/chakirou18/AI-OfficeFlow/pull/32) merged through unchanged
+required checks as `a43d7ddbbc4bfcb347941371dd6a14f1334ceb36`; local main synchronized.
+[Main CI 39369826860](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39369826860)
+passed and automatically triggered
+[Release 39370014394](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370014394),
+which passed private-package checks, exact runtime-image authenticated smoke and
+isolated restore before publishing to private packages only.
+
+New development request [7191601728](https://api.github.com/repos/chakirou18/AI-OfficeFlow/deployments/7191601728)
+was automatically received by the foreground controller. GitHub recorded
+`in_progress` at 04:32:29Z, then genuine `success` at 04:33:03Z after pulls,
+migrations, health and authenticated smoke at `http://127.0.0.1:18080`.
+CSRF enforcement, persisted simulated pending analysis and zero task activation
+passed. Controller state/proof is local `artifacts/deployment/development/proof.json`.
+Old public request `7191157555` was explicitly retired as inactive, never deployed.
+
+Delivered immutable digests (distinct from the earlier no-build copy experiment):
+
+- API: `ghcr.io/chakirou18/ai-officeflow-private-api@sha256:cd52f4991db7660097c90bed9c4516b72d8f63f3183c8ccae794dffee483731b`
+- Frontend: `ghcr.io/chakirou18/ai-officeflow-private-frontend@sha256:0a5b863a22c3808e443b3b8cef3ed1c52c2c4a78178c4c7c08150f222c37acaa`
+
+Manual [promotion 39370240008](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370240008)
+was explicitly dispatched with development ID 7191601728 but **failed before any
+production request or deployment**: the new private-package metadata check requires
+`packages: read`, absent from the promotion job's scoped token. The existing release
+job has package write access and passed this same check. Draft
+[PR #33](https://github.com/chakirou18/AI-OfficeFlow/pull/33), head
+`5a5d6d6484a6a691d5df276ab7d955e15ba0d4d3`, adds exactly that read-only permission;
+[required CI 39370420407](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370420407)
+passed (Backend checks 1m39s; Frontend checks 15s). Its additional bootstrap merge
+exception was pending at that point and was subsequently explicitly authorized;
+the successful resolution is recorded below.
+
+Independent delivered-development recovery verification passed using
+`python artifacts/t16_private_dev_recovery.py` (exit 0): isolated no-network restore
+matched `7|0|7|0006_human_decisions`; compatible previous-image rollback and forward
+recovery passed authenticated health/smoke and retained every pre-existing
+request/task/run ID. Synthetic smoke increased counts from 7/0/7 to 9/0/9, with
+zero task activation. Schema remained `0006_human_decisions`. Full proof is local
+`artifacts/t16-private-dev-recovery.json`. Production was untouched by the failed
+promotion. No package, volume, database or deployment data deletion occurred.
+
+## Completed manual production promotion and acceptance evidence
+
+The user explicitly approved the one-time PR #33 bootstrap exception.
+[PR #33](https://github.com/chakirou18/AI-OfficeFlow/pull/33) merged as
+`d6856b4616898d33a06cf92c45d59a1e53465493` after both required checks passed on
+`5a5d6d6484a6a691d5df276ab7d955e15ba0d4d3`. Only the missing read-only package
+permission changed. Strict merge checks and administrator enforcement were preserved.
+[Main CI 39370966715](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370966715)
+also passed. The failed first promotion remains in history and is not counted as success.
+
+Manual [Promote production 39370972260](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370972260)
+was dispatched on main with successful development deployment ID **7191601728**.
+It reused that deployment's exact manifest and private digests listed above;
+production did not rebuild either image. Production request
+[7191726926](https://api.github.com/repos/chakirou18/AI-OfficeFlow/deployments/7191726926)
+targeted `production` with source release commit
+`a43d7ddbbc4bfcb347941371dd6a14f1334ceb36`, while the manually invoked promotion
+workflow itself ran at permission-fix commit `d6856b4616898d33a06cf92c45d59a1e53465493`.
+The controller verified successful trusted-main CI/publisher provenance, successful
+manual workflow origin, private package ownership/visibility and equality with
+its verified development state. GitHub recorded `in_progress` at 04:42:44Z and
+**success at 04:43:11Z**, after actual image pulls, migrations, health and
+authenticated smoke at `http://127.0.0.1:28080`. Both environments passed CSRF,
+persisted simulated pending analysis and zero task activation. Running container
+references and image IDs were independently compared with the promoted digests.
+
+`python artifacts/t16_final_delivery_verify.py` completed exit 0. Actual production
+restore in a fresh no-network tmpfs PostgreSQL instance matched
+**3 requests / 0 tasks / 3 runs / 0006_human_decisions**. The development restore,
+rollback and forward-recovery proof above applies to the same exact release and
+was reused rather than rerun. All baseline row IDs survived: development 6/0/6
+before delivery became 9/0/9 after deployment/recovery smoke; production 2/0/2 became
+3/0/3 after promotion smoke. Separate live DB credentials were compared in memory,
+not recorded; database names and volumes were independently verified as
+`officeflow_development` / `officeflow-development_database` and
+`officeflow_production` / `officeflow-production_database`. Prometheus, Loki, Tempo
+and Grafana named volumes remain present. No package, volume or database deletion,
+live restore-over, downgrade or public service exposure occurred. Existing public
+GHCR packages remain untouched.
+
+Fresh authenticated dashboard recordings were captured from the actual delivered
+applications using the installed Edge browser and existing workspace encoder cache
+(`PLAYWRIGHT_BROWSERS_PATH=artifacts/playwright node artifacts/t16_delivered_capture.mjs`).
+The first attempt lacked that cache setting; no encoder/runtime was downloaded.
+Videos show synthetic dashboard counts and pseudonymous demo handles, with no
+passwords, session tokens, request descriptions or model bodies. Recorded health
+returned ready/database OK and migration `0006_human_decisions` in both environments.
+
+| Acceptance criterion | Actual evidence |
+| --- | --- |
+| Actual deployment recording, synthetic data and access instructions | [Development video](evidence/t16-development.webm), [production video](evidence/t16-production.webm); [development poster](evidence/t16-development.png), [production poster](evidence/t16-production.png). Start Docker Desktop, use the same PC's localhost URLs, and read that environment's ignored `artifacts/deployment/<environment>/demo-login.json` locally to sign in. Never publish that file. |
+| PR tests, automatic dev and manual production of tested digests | Required [PR #32 CI](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39369153430), [PR #33 CI](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39370420407), main CI/release/manual workflow links and genuine deployment status sequences above. |
+| Isolated DB/secrets and previous compatible image recovery | Independent live configuration/volume comparisons; delivered-development rollback/forward recovery retained every prior row ID; earlier failed-migration candidate rehearsal retained a healthy previous release, with the same unchanged compatibility schema. |
+| Migrations and isolated backup/restore without paid provisioning | Both environments at `0006_human_decisions`; isolated development restore 7/0/7 and production restore 3/0/3. Fixed local Docker host, no paid host or subscription. |
+
+[Sanitized machine-readable evidence](evidence/t16-delivery.json) contains the
+release manifest, deployment IDs/status times, counts and recovery results.
+Detailed local reports remain `artifacts/t16-final-delivery-proof.json`,
+`artifacts/t16-private-dev-recovery.json` and `artifacts/t16-delivered-recording.json`.
+Credentials, backups and session material remain ignored and unpublished.
+
+The controller was intentionally stopped by operator Ctrl+C after production success;
+no background service, scheduled task or self-hosted runner was installed.
+The apps remain running on loopback and require this PC/Docker Desktop. Later
+main commits can enqueue new release requests while the controller is stopped;
+those requests are not claimed deployed by this evidence. Restarting the approved
+foreground controller is required for future delivery. This evidence establishes
+the completed development/production demonstration of source release `a43d7dd`,
+not continuous availability, public HTTPS hosting or deployment of later docs commits.
+T17/T18 remain outside this task; no final grading score is claimed.
