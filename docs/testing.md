@@ -1,5 +1,7 @@
 # T12 test coverage and commands
 
+Historical T12 baseline below. Later T15 evidence records 188 backend tests (81.22 s); current T18 checks and their limits are in [final-handover.md](final-handover.md). No historical result is a fresh T18 run.
+
 Scope: synthetic request/analysis/human-decision functionality through T11.
 No telemetry, alerting, deployment or T13+ coverage is claimed. Final executed
 results and required CI links are recorded on [Issue #12](https://github.com/chakirou18/AI-OfficeFlow/issues/12).

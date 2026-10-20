@@ -1,6 +1,6 @@
 # Local development guide
 
-Scope: application through T12 and T13 local observability. Alerting, deployment and incident features remain later tasks. Keep Compose local. See [observability setup](observability.md), [test commands](testing.md) and the API sections below; historical T04-only evidence remains separate.
+Scope: implemented application, telemetry, alerting, bounded on-call and delivery through T17. See [T18 clean-source validation](t18-clean-checkout.md) for current environment blockers; versioned sections below retain incremental history, and later sections supersede earlier slice limitations. Keep Compose local. See [observability setup](observability.md), [test commands](testing.md) and the API sections below; historical T04-only evidence remains separate.
 
 ## Prerequisites and configuration
 
@@ -13,7 +13,7 @@ python scripts/configure_local.py
 python scripts/configure_observability.py
 ```
 
-It creates an ignored `.env` with a generated local database password and default loopback ports. It does not print the password or overwrite an existing file. [.env.example](../.env.example) documents the names with a placeholder, not usable credentials. The API rejects that placeholder. Do not commit `.env`. Public deployment requires the separate T16 HTTPS/configuration work.
+It creates an ignored `.env` with a generated local database password and default loopback ports. It does not print the password or overwrite an existing file. [.env.example](../.env.example) documents the names with a placeholder, not usable credentials. The API rejects that placeholder. Do not commit `.env`. T16 provides actual localhost deployment recordings; public HTTPS hosting is not configured or authorized.
 
 ## Start the local application
 
@@ -28,7 +28,7 @@ docker compose up -d --wait
 docker compose ps --all
 ```
 
-Expected: `frontend`, `api`, `db` healthy; `migrate` exited **0** (successful one-shot job, not a crashed service). A `test-db` container may be stopped after running tests. T04 has four core services; the final project's telemetry/on-call services are later scope and are not claimed present.
+Expected: `frontend`, `api`, `db` healthy; `migrate` exited **0** (successful one-shot job, not a crashed service). A `test-db` container may be stopped after running tests. The full Compose stack also includes Collector, Prometheus, Loki, Tempo, Grafana, Alertmanager and the private on-call listener; exercise gates default off.
 
 | Local address | Purpose |
 | --- | --- |

@@ -1,6 +1,6 @@
 # Product specification
 
-Owner: [T01](https://github.com/chakirou18/AI-OfficeFlow/issues/1). Current scope supersedes the earlier pilot/enterprise specification under [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). The product stories below remain requirements, not completed features. T04's separate fixed-payload health/connectivity foundation has verified tests and persistence evidence in [t04-verification.md](t04-verification.md); it does not implement request/task/AI/approval stories.
+Owner: [T01](https://github.com/chakirou18/AI-OfficeFlow/issues/1). Current scope supersedes the earlier pilot/enterprise specification under [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). The product stories below define acceptance behavior implemented through T15; current evidence and remaining delivery gates are in [final-handover.md](final-handover.md). T04's separate fixed-payload health/connectivity foundation has verified tests and persistence evidence in [t04-verification.md](t04-verification.md); it does not implement request/task/AI/approval stories.
 
 ## Scope and users
 
@@ -12,7 +12,7 @@ Only title and description are needed. Requests are immutable after creation in 
 
 **A01–A06 are superseded and have no current acceptance or approval authority.** Their earlier content remains in Git history and explicitly superseded ADRs only. There is no pilot company and no company stakeholder-validation gate. In particular, sector fields/access policies/deadline assumptions are removed, synthetic-only data is a current project rule, and the controlled incident is an educational demonstration rather than a company operational workflow. No stakeholder approval is claimed.
 
-Current decisions: small generic scope, synthetic-only data, human approval before activating tasks, a single analysis agent, and no real integrations. This documentation task does not authorize implementation, paid services, live API spend, deployment, a subagent invocation or executing a fault exercise. T15 will define and obtain authorization for its bounded dev-only exercise before running it.
+Current decisions: small generic scope, synthetic-only data, human approval before activating tasks, a single analysis agent, and no real integrations. This documentation task does not authorize implementation, paid services, live API spend, deployment, a subagent invocation or executing a fault exercise. T15 obtained one exact authorization and demonstrated its bounded exercise; a repeat needs fresh authorization.
 
 ## States and invariants
 
@@ -92,7 +92,7 @@ As the maintainer, I can demonstrate user-impact alerting and an actual alert-tr
 - Alertmanager automatically invokes the custom on-call agent through an authenticated internal webhook. Repeated delivery for the same incident is deduplicated.
 - The agent reads redacted diagnostics, confirms the known flag is the cause, and clears that exact dev flag under the exercise's prior human authorization. The human does not perform the repair manually. No general infrastructure/code/shell action exists.
 - The agent verifies analysis health through a bounded synthetic check of the same analysis service; the recording also shows a user analysis succeeding after repair. If cause/authorization/environment checks fail or verification fails, stop and report; do not improvise another fix.
-- Record alert → automatic invocation → diagnosis → single allowlisted repair → recovery evidence. This is a planned demonstration, not an incident that has occurred.
+- Record alert → automatic invocation → diagnosis → single allowlisted repair → recovery evidence. The actual T15 exercise is recorded in [oncall-agent.md](oncall-agent.md); this specification does not authorize a repeat.
 
 ## Delivery acceptance
 
@@ -102,4 +102,4 @@ As the maintainer, I can demonstrate user-impact alerting and an actual alert-tr
 - A working public URL or a clear deployed demonstration is provided. The project prefers a public authenticated HTTPS demo if feasible; a recorded actual deployment is an allowed fallback, not a README-only deployment plan.
 - OTel metrics/traces/structured logs share trace context, are collected/stored and are visible in Grafana with trace-to-log and metric-to-trace navigation. No trace IDs as metric labels.
 - Show working user-impact alert and actual automatic on-call recovery. Complete all seven Module 5 artifacts and three mandatory peer reviews.
-- Record exact commands, observed smoke timings, versions, CI runs, deployment/demo and limitations on the relevant issues. No arbitrary commercial load/SLA target is required; no test, score or deployment is verified yet.
+- Record exact commands, observed smoke timings, versions, CI runs, deployment/demo and limitations on the relevant issues. No arbitrary commercial load/SLA target is required; test and deployment evidence is linked in [final-handover.md](final-handover.md); no score is claimed.

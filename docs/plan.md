@@ -1,10 +1,10 @@
 # Incremental final-project roadmap
 
-Target: all 12 official criteria / 24 available points, all seven Module 5 items and three peer reviews. No points or runtime completion are claimed. Scope and decisions are in [specification.md](specification.md) and [ADR 0010](adr/0010-minimal-zoomcamp-scope.md).
+Target: all 12 official criteria / 24 available points, all seven Module 5 items and three peer reviews. No grading points are claimed; runtime evidence is versioned in the final handover. Scope and decisions are in [specification.md](specification.md) and [ADR 0010](adr/0010-minimal-zoomcamp-scope.md).
 
 ## Recovery and current position
 
-Before the interrupted verification, commits `0753300` and `4d21e6f` were pushed successfully; T01/T02 were closed with evidence and T03 remained in review. This session verified local/remote main matched `4d21e6fb89ecd8cad8a8b7b746f64b01e12a4fbd` and the working tree was clean before editing. The promised final T03 verification comment was absent; its existing design comment and nine ADRs were already present and were not recreated.
+T01-T17 are completed; T18 is preparing a review PR. Initial T18 local/remote main matched `6a6098f6baa36e3b49b2dfdaacc721981237f102` with a clean tree. See [final handover](final-handover.md) for actual evidence and blockers.
 
 The current scope supersedes the commercial/pilot direction. A01-A06 are retired. Earlier ADRs and issue evidence remain historical; only the small generic educational app is current. T01/T02 acceptance evidence remains useful and is reassessed without reopening completed work unnecessarily. T03 is a design task, not model/hosting procurement.
 
@@ -32,9 +32,9 @@ The [Module 5 checklist](module5-checklist.md) retains all seven requirements; t
 
 ## Decisions deliberately delayed to their delivery task
 
-- T10: select a real provider/model and bounded usage plan before a live evaluation. No live spend or key is needed for T04 or default CI.
-- T16: select existing/approved host, account, region and TLS/access setup; obtain approval before any paid provisioning. A clear actual deployment demo is an allowed fallback to a public URL. Both automatic dev and manual production paths still need evidence.
-- T15: authorize the exact dev incident and narrow repair before execution. No operational exercise runs during design.
-- T17: bind portable subagent/workflow definitions to a supported tool and obtain explicit subagent-invocation authorization. The custom on-call agent is the selected custom-agent artifact, not a claim of a supported plugin manifest.
+- T10 selected and evaluated the installed local Ollama model; default CI remains simulated.
+- T16 demonstrated automatic dev/manual production delivery on localhost, with recordings and recovery evidence; no public hosting is configured.
+- T15 completed the exact authorized dev incident and one narrow automatic repair; repeat authorization is required.
+- T17 completed the separately authorized independent reviewer process and reused the custom on-call agent; native spawn attempts remain unverified.
 
-**Current handoff: T04 PR review.** The local frontend/API/PostgreSQL skeleton now has verified migration/health, five foundation tests, two browser tests, restart persistence and clean committed-source startup; see [the evidence record](t04-verification.md). It is not request management or the final full demonstration. Stop for review with #4 open and no merge. Only after review should an authorized later task begin T05 CI; no CI workflow, T06 authentication or later feature was implemented here.
+**Current: T18 handover review preparation.** T17 PR #35 is merged. Preserve historical evidence; do not rerun the reviewer, incident, model evaluation or deployment controller. Keep #18 open until its remaining acceptance gates are verified. See [final-handover.md](final-handover.md).
