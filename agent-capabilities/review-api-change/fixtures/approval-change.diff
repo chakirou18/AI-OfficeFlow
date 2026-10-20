@@ -1,0 +1,37 @@
+diff --git a/synthetic/approval_candidate.py b/synthetic/approval_candidate.py
+new file mode 100644
+--- /dev/null
++++ b/synthetic/approval_candidate.py
+@@ -0,0 +1,32 @@
++# Synthetic review input only. Not installed, imported or served by the app.
++from pydantic import BaseModel
++
++class ApprovalInput(BaseModel):
++    tasks: list[dict]
++    auto_approve: bool = True
++
++@router.post('/analyses/{analysis_id}/decision')
++async def decide(analysis_id: str, payload: ApprovalInput, db=Depends(get_db)):
++    run = db.get(AnalysisRun, analysis_id)
++    run.state = 'approved'
++    db.commit()
++    for suggestion in payload.tasks:
++        db.add(Task(analysis_id=run.id, title=suggestion['title'],
++                    priority=suggestion['priority'], state='open'))
++        db.commit()
++    return {'state': run.state}
++
++async def after_model_result(run, model_output, db):
++    run.proposal = model_output
++    if model_output.get('auto_approve', True):
++        await decide(str(run.id), ApprovalInput(tasks=model_output['tasks']), db)
++
++def test_decision_happy_path(client):
++    response = client.post('/analyses/synthetic-id/decision',
++                           json={'tasks': [{'title': 'Synthetic task',
++                                            'priority': 'urgent'}]})
++    assert response.status_code == 200
++
++# Proposed tests currently check only the happy path shown above.
++# The submission has no migration or concurrency/denial tests attached.
++# End of isolated synthetic change; no production code is modified.
