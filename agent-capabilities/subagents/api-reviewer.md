@@ -34,3 +34,19 @@ returned findings and source hashes before reporting success. An unavailable
 registered type, runtime failure or unexecuted invocation remains an unmet item.
 
 Reference: [official Codex subagents](https://developers.openai.com/codex/subagents).
+
+## Actual T17 result
+
+The user approved one exact invocation and the launcher ran once on source commit
+`3404eacad124f664f695dfdd02924ef336dab662`. The native supervisor used the supplied
+skill but reported `UNSUPPORTED`: its available interface could not select/invoke
+the registered `api_reviewer` type. It spawned no child and returned no independent
+findings. Source hashes were unchanged. Its zero process exit code means the
+supervisor turn completed; it is **not** proof of a review.
+
+[Sanitized actual result](../../docs/evidence/t17-reviewer-attempt.json) and
+[native response](../../docs/evidence/t17-supervisor-response.md) are retained.
+Do not retry, substitute a generic agent or count the subagent requirement as done.
+A compatible named-agent interface and fresh explicit invocation approval are
+required to continue. This records a limitation of the observed invocation surface,
+not a claim that every Codex surface lacks custom agents.

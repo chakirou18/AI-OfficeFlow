@@ -53,8 +53,12 @@ parent's sandbox; its TOML instructions alone do not create OS permissions. The
 [launcher](../scripts/invoke_api_reviewer.py) requires a reference to actual prior
 human approval and selects native `read-only` with approval mode `never`, no
 daemon, no shell/apps/plugins and at most one subagent. The reference is not a
-substitute for approval. The exact T17 invocation is pending until user consent
-and native execution evidence are recorded; prepared files do not prove it ran.
+substitute for approval. The user subsequently approved one exact T17 supervisor
+invocation. It ran once with those controls and unchanged source hashes, but
+reported unsupported registered-agent selection and spawned no reviewer. The
+one-run approval is consumed; reviewer runtime enforcement/findings remain
+unverified. No retry or generic substitute is authorized. See the
+[actual result](evidence/t17-reviewer-attempt.json).
 
 The [executable guardrail](../agent-hooks/README.md) has one fixed synthetic read
 capability. It checks the exact role/actions and fixture integrity before dispatch.
