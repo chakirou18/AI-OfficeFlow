@@ -1,0 +1,123 @@
+{
+  "release": {
+    "commit": "a43d7ddbbc4bfcb347941371dd6a14f1334ceb36",
+    "api": "ghcr.io/chakirou18/ai-officeflow-private-api@sha256:cd52f4991db7660097c90bed9c4516b72d8f63f3183c8ccae794dffee483731b",
+    "frontend": "ghcr.io/chakirou18/ai-officeflow-private-frontend@sha256:0a5b863a22c3808e443b3b8cef3ed1c52c2c4a78178c4c7c08150f222c37acaa",
+    "compatible_revisions": [
+      "0006_human_decisions"
+    ],
+    "ci_run": 39369826860,
+    "release_run": 39370014394
+  },
+  "development_deployment_id": 7191601728,
+  "production_deployment_id": 7191726926,
+  "promotion_run": 39370972260,
+  "separate_credentials": true,
+  "controller_stopped_after_demonstration": true,
+  "environments": {
+    "development": {
+      "before_delivery_counts": {
+        "requests": 6,
+        "tasks": 0,
+        "runs": 6
+      },
+      "current_counts": {
+        "requests": 9,
+        "tasks": 0,
+        "runs": 9
+      },
+      "existing_rows_retained": true,
+      "volume": "officeflow-development_database",
+      "revision": "0006_human_decisions",
+      "restore": {
+        "restored_counts_and_revision": "7|0|7|0006_human_decisions",
+        "isolated_no_network": true,
+        "live_database_unchanged": true
+      },
+      "running_digest_and_health_verified": true,
+      "loopback_only": true
+    },
+    "production": {
+      "before_delivery_counts": {
+        "requests": 2,
+        "tasks": 0,
+        "runs": 2
+      },
+      "current_counts": {
+        "requests": 3,
+        "tasks": 0,
+        "runs": 3
+      },
+      "existing_rows_retained": true,
+      "volume": "officeflow-production_database",
+      "revision": "0006_human_decisions",
+      "restore": {
+        "restored_counts_and_revision": "3|0|3|0006_human_decisions",
+        "isolated_no_network": true,
+        "live_database_unchanged": true
+      },
+      "running_digest_and_health_verified": true,
+      "loopback_only": true
+    }
+  },
+  "telemetry_volumes_preserved": true,
+  "development_recovery": {
+    "schema": "0006_human_decisions",
+    "restore": {
+      "restored_counts_and_revision": "7|0|7|0006_human_decisions",
+      "isolated_no_network": true,
+      "live_database_unchanged": true
+    },
+    "rollback": {
+      "healthy": true,
+      "authenticated_smoke": true,
+      "csrf_enforced": true,
+      "pending_persisted": true,
+      "active_tasks_created": 0,
+      "url": "http://127.0.0.1:18080"
+    },
+    "forward_recovery": {
+      "healthy": true,
+      "authenticated_smoke": true,
+      "csrf_enforced": true,
+      "pending_persisted": true,
+      "active_tasks_created": 0,
+      "url": "http://127.0.0.1:18080"
+    },
+    "all_existing_rows_preserved": true,
+    "before_counts": {
+      "requests": 7,
+      "tasks": 0,
+      "runs": 7
+    },
+    "after_counts": {
+      "requests": 9,
+      "tasks": 0,
+      "runs": 9
+    }
+  },
+  "github_statuses": {
+    "development": {
+      "in_progress": "2026-10-20T04:32:29Z",
+      "success": "2026-10-20T04:33:03Z"
+    },
+    "production": {
+      "in_progress": "2026-10-20T04:42:44Z",
+      "success": "2026-10-20T04:43:11Z"
+    }
+  },
+  "recordings": {
+    "development": {
+      "video": "t16-development.webm",
+      "poster": "t16-development.png",
+      "authenticated_dashboard_rendered": true,
+      "video_sha256": "3c3e9389e7137377bf63f6fb9ceff74235c8afa4d2f7a6fabf2842d88d93f717"
+    },
+    "production": {
+      "video": "t16-production.webm",
+      "poster": "t16-production.png",
+      "authenticated_dashboard_rendered": true,
+      "video_sha256": "a808a3287b8dda4df8350dae61391122decf4944d696a16f1f5fff6135e86cec"
+    }
+  }
+}
