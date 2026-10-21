@@ -100,6 +100,16 @@ T17/T18 documentation head. [Deployment evidence](deployment.md) includes
 [development video](evidence/t16-development.webm),
 [production video](evidence/t16-production.webm) and
 [sanitized delivery proof](evidence/t16-delivery.json).
+
+Supplementary T18 recordings from 2026-10-21 show real read-only navigation in
+the recovered original T16 environments: [Development walkthrough, 44.76 seconds](evidence/t18-development-walkthrough.webm)
+and [Production walkthrough, 44.64 seconds](evidence/t18-production-walkthrough.webm).
+Both use the same documented tested T16 release, with independent persisted data
+(9 development requests versus 3 production requests). See [walkthrough provenance,
+hashes and limitations](deployment.md#supplementary-t18-interactive-walkthroughs).
+These supplement historical delivery evidence; they show no new deployment,
+promotion or updated release, and claim no public hosting or grading points.
+
 Automatic development deployment `7191601728` and manual production deployment
 `7191726926` succeeded with identical tested private image digests. Development
 rollback/forward recovery retained prior row IDs; isolated restores matched
@@ -107,7 +117,7 @@ development 7/0/7 and production 3/0/3 request/task/run counts at schema
 `0006_human_decisions`. No live restore-over or downgrade occurred.
 
 These are actual localhost deployments with recordings, not public hosting.
-The foreground controller was stopped after T16. Docker was later started only for the isolated T18 validation; existing release stacks stayed stopped. Their recorded availability is not claimed current. Later successful
+The foreground controller was stopped after T16. During the initial isolated T18 validation, existing release stacks stayed stopped. A separately authorized 2026-10-21 recovery started only the original six T16 containers for the supplementary walkthroughs, then cleanly stopped all six. Their recorded availability is not claimed current. Later successful
 release workflows can enqueue requests without deploying them; initial-main
 [release 39382827351](https://github.com/chakirou18/AI-OfficeFlow/actions/runs/39382827351)
 is not evidence that its source was applied by a running controller.
@@ -116,7 +126,7 @@ is not evidence that its source was applied by a running controller.
 metrics, 18 correlated events, a 21-span trace, exemplars and Grafana navigation.
 [T15 recovery](oncall-agent.md), source `e8705e1`, records the real automatic
 alert/diagnosis/one-clear/verification journey. Both are historical demonstrations;
-no incident, recovery, deployment controller or promotion was repeated for T18.
+no new incident, on-call repair, deployment controller activation or promotion occurred for T18. Normal PostgreSQL recovery for the separately authorized walkthroughs is documented above.
 Telemetry retention is seven days; live historical data is not guaranteed to remain.
 
 ## Demonstration and submission

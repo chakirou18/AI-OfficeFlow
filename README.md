@@ -4,6 +4,12 @@ AI OfficeFlow is a small **AI-assisted request and task manager** built exclusiv
 
 **Status: T01-T17 delivered; T18 evidence handover prepared, with verified clean-source execution using cached dependencies; three course peer-review confirmations remain outstanding. A cold installation is not verified.** See the [final handover](docs/final-handover.md) and [implementation map](docs/implementation-map.md). [Module 5 evidence](docs/module5-checklist.md) verifies all seven requirements, including one independent CLI subprocess reviewer (not native spawn_agent). T16 demonstrated automatic private development delivery and manual production promotion of the exact same tested image digests on this Windows/Docker Desktop host. Both release apps bind only to localhost; the foreground controller is stopped after the demonstration. [Deployment evidence, recordings and access instructions](docs/deployment.md) include actual CI/deployment IDs, isolated restore and rollback/forward recovery. No public hosting or grading score is claimed.
 
+Watch the supplementary [Development walkthrough (44.76 seconds)](docs/evidence/t18-development-walkthrough.webm)
+and [Production walkthrough (44.64 seconds)](docs/evidence/t18-production-walkthrough.webm),
+showing real read-only navigation of the same tested T16 release with independent
+persisted data. These localhost recordings supplement historical delivery evidence;
+they do not claim a new deployment or public hosting. [Provenance and limitations](docs/deployment.md#supplementary-t18-interactive-walkthroughs).
+
 ## Run locally
 
 With Docker Desktop running Linux containers and Python available, generate local configuration once:
