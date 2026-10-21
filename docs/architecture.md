@@ -1,8 +1,6 @@
 # Minimal final-project architecture
 
-Owner: [T03](https://github.com/chakirou18/AI-OfficeFlow/issues/3). Current decision: [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). Older ADRs 0001–0009 are superseded design history, not implementation requirements. This is target design except for the explicitly verified T04 foundation below.
-
-T04 implementation note: the four-service local foundation (frontend, API, PostgreSQL and one-shot migration) is implemented and verified on its feature branch. It exposes only health and fixed synthetic `foundation_checks` save/read endpoints. [development.md](development.md) gives working commands; [t04-verification.md](t04-verification.md) records tests, real restart persistence and clean-source startup. The application entities/flows, sessions, analysis and telemetry/on-call architecture below remain target design, not implemented T04 features.
+Owner: [T03](https://github.com/chakirou18/AI-OfficeFlow/issues/3). Current decision: [ADR 0010](adr/0010-minimal-zoomcamp-scope.md). Older ADRs 0001–0009 are superseded design history, not implementation requirements. The application and operational components are implemented through T17. See the [code-based implementation map](implementation-map.md) for actual entry points, controls and evidence; T04's [foundation record](t04-verification.md) remains historical.
 
 ## Components and flow
 
@@ -11,11 +9,11 @@ T04 implementation note: the four-service local foundation (frontend, API, Postg
 | React + TypeScript + Vite | Create/list/detail requests, show task/priority suggestions, approve/reject and dashboard. Serve a static build through a same-origin proxy in deployment. |
 | Python + FastAPI/Pydantic | Session protection, JSON/OpenAPI contract, validation, one synchronous analysis workflow, PostgreSQL transactions and private ops interface. |
 | PostgreSQL + SQLAlchemy/Alembic | Durable requests, analyses, approved tasks, sessions, decisions/activity and small demo operational state. |
-| Model adapter | Deterministic offline stub plus a provider-neutral live adapter configured only after authorized provider/model evaluation. |
+| Model adapter | Deterministic offline stub plus the local Ollama adapter evaluated in T10; fixed `llama3.2:3b`, no model download on startup. |
 | OTel Collector + Prometheus/Loki/Tempo + Grafana | Collect/store/display correlated metrics, structured logs and distributed traces. |
 | Prometheus rules + Alertmanager | User-impact analysis-error alert and authenticated internal delivery. |
 | Custom on-call agent | Separate bounded webhook listener/diagnostic loop; clears only a pre-authorized dev analysis flag and verifies recovery. Also the selected Module 5 custom-agent artifact. |
-| Read-only MCP stdio tool | Small local Extension Pack tool such as get_request_summary for synthetic data, using a read-only API scope; no network MCP platform needed. |
+| Read-only MCP stdio tool | Exactly `get_request_summary` for synthetic data, using PostgreSQL READ ONLY transactions; no network MCP listener. |
 
 ```mermaid
 sequenceDiagram
@@ -62,7 +60,7 @@ All demo accounts have equal permissions in one shared synthetic workspace. Use 
 
 The analysis agent produces 1–5 proposed tasks, each with priority low/medium/high and a rationale. Python validates the schema and output size. Model text cannot activate tasks or invoke ops tools. The UI escapes text. No owner/deadline extraction, company policy, external tool loop or business-side effects.
 
-Stub mode supports one-command boot/tests without a model key and is labeled simulated. T10 must separately demonstrate a real approved model; the stub alone does not finish the AI feature. Live provider/model and usage allowance are a T10 decision, not a blocker on architecture or local scaffolding. Before live calls: approve provider/data settings and a bounded call allowance; cap input/output tokens, concurrent calls and per-call duration; persist consumed call allowance before dispatch so restarts do not reset it. Failed/uncertain billed calls consume their allowance. No automatic provider failover. Exact live prices/quotas are not assumed, and no live call/spend is authorized now.
+Stub mode supports one-command boot/tests without a model key and is labeled simulated. [T10](t10-verification.md) separately demonstrated the approved local Ollama model. Real calls require a bounded allowance; input/output tokens, concurrency and duration are limited, and consumed allowance persists before dispatch so restarts do not reset it. Failed calls consume allowance. No automatic provider failover or new live call is authorized by this documentation.
 
 ## Observability and actual repair
 
@@ -74,14 +72,17 @@ The exercise's human authorization pre-approves only this one action for a bound
 
 ## Boot, tests and delivery
 
-Planned commands (no Compose/scripts exist): `docker compose up --build` starts the complete demo including PostgreSQL, migrations, app, observability, alerting and listener; `docker compose --profile test run --build --rm test` runs unit/integration suites against isolated PostgreSQL. The fault/repair action is disabled by default. A documented lightweight profile can later support feature development; it does not replace full-stack startup evidence.
+Implemented commands (runtime evidence is linked in the handover): `docker compose up --build` starts the complete demo including PostgreSQL, migrations, app, observability, alerting and listener; `docker compose --profile test run --build --rm test` runs unit/integration suites against isolated PostgreSQL. The fault/repair action is disabled by default. A documented lightweight profile can later support feature development; it does not replace full-stack startup evidence.
 
 PR CI runs deterministic tests/checks. A successful trusted main release builds immutable images and automatically deploys the same release to `dev`. A separate manually initiated production workflow promotes its tested digest. Use separate Compose projects/databases/volumes/secrets/origins, environment deployment locks and protected credentials. No secrets in untrusted PR jobs.
 
-Choose Compose-compatible deployment, with public hosting account/region/budget finalized in T16; an actual deployment on existing approved infrastructure plus a clear recording is the rubric-permitted fallback. Dev/production are release environments using synthetic data, not real businesses. Do not assume a free tier. Before any paid hosting, obtain approval and a current quote. Promotion runs migrations, health and synthetic smoke checks. Roll back to the previous schema-compatible image; use additive migrations, and do not automate database downgrade or volume deletion. Rehearse a small isolated backup restore rather than building an enterprise backup platform.
+T16 selected Compose deployment on the existing Windows/Docker Desktop host with actual recordings, the rubric-permitted alternative to public hosting. Development/production have separate databases, volumes and credentials. Promotion runs migrations, health and synthetic smoke checks using the tested immutable digests. Compatible-image rollback and isolated backup restores were demonstrated; database downgrade and volume deletion are not automated. See [deployment evidence](deployment.md). The foreground controller is stopped.
 
-## Next steps and decision boundaries
+## Current delivery boundaries
 
-T03 is a documentation/design task, not procurement or runtime validation. Its current selections are a single Python workflow, bounded stub/live adapter, simple session protection, local Compose/deployment contract and stored telemetry. External account selection belongs to T10/T16; it does not block T04. T04 is the next implementation slice: minimal frontend/API/PostgreSQL/migration/health/Compose skeleton, then early CI in T05. Preserve all existing task dependencies; full T04 acceptance still needs actual startup evidence.
-
-All seven Module 5 items and three peer reviews remain in the roadmap. T15 must obtain exact exercise authorization; T17 must select a supported subagent runtime and get invocation authorization. No code, dependency installation, paid service or deployment is authorized by this architecture revision.
+T01-T17 are delivered. T18 consolidates actual evidence and leaves missing gates
+explicit; see [final handover](final-handover.md). T16 selected actual localhost
+deployment recordings instead of public hosting. The foreground controller is stopped.
+Real-model, incident and reviewer authorizations are consumed, not repeat permissions.
+Three course peer-review confirmations and current clean-source runtime verification
+remain outstanding. Historical ADRs are preserved; ADR 0010 remains normative.

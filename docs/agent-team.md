@@ -12,7 +12,7 @@ This document specifies responsibilities for coding assistance, not a deployed m
 | QA/API reviewer | Independently inspect behavior, approval consistency, access and failures | Reproduction, findings and evidence; later specialized-subagent artifact |
 | Operations reviewer | Verify Compose, release paths, stored telemetry, alert and bounded recovery | Commands, dashboards, pipeline runs and recovery recording |
 
-One coding agent may perform several roles sequentially. A role description is not evidence of a running specialized subagent. Do not spawn/delegate unless explicitly authorized by the user; this documentation session does not invoke a subagent. T17 will demonstrate a real scoped API-reviewer subagent after authorization.
+One coding agent may perform several roles sequentially. A role description is not evidence of a running specialized subagent. Do not spawn/delegate unless explicitly authorized by the user; this documentation session does not invoke a subagent. T17 demonstrated one separately authorized specialized reviewer in an independent CLI process/session; [evidence](evidence/t17-integrated-demo.md) distinguishes it from unsuccessful native spawn attempts. That authorization is consumed.
 
 ## Collaboration process
 
@@ -28,6 +28,6 @@ Issue comments and commits already provide evidence of coding-agent tracker use 
 
 The **Request Analysis Agent** is one bounded application workflow: read a synthetic request, call the model adapter once, validate proposed tasks/priorities and return a pending suggestion set. It cannot approve its own result. Sales/Coordination agents and company profiles are retired from current scope.
 
-The **On-Call Agent** is a separate custom operational process triggered automatically by Alertmanager. Under a later human-authorized dev exercise, it reads bounded diagnostics, diagnoses the known analysis-disable flag, clears only that flag, and verifies recovery. It has no task-approval permission, shell, deployment ability or production mutation. Its explicit artifact and demonstration also fulfill the selected custom-agent branch of Module 5; that does not automatically satisfy the other six items.
+The **On-Call Agent** is a separate custom operational process triggered automatically by Alertmanager. Under the exact human-authorized T15 dev exercise, it reads bounded diagnostics, diagnoses the known analysis-disable flag, clears only that flag, and verifies recovery. It has no task-approval permission, shell, deployment ability or production mutation. Its explicit artifact and demonstration also fulfill the selected custom-agent branch of Module 5; that does not automatically satisfy the other six items.
 
 See [permissions.md](permissions.md), [Module 5 checklist](module5-checklist.md) and [grading checklist](grading-checklist.md). No business workflow stakeholder approval is required or claimed in this project.

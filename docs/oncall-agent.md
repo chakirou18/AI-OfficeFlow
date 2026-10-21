@@ -1,5 +1,7 @@
 # T15 bounded custom on-call agent
 
+Completed historical demonstration: [Issue #15](https://github.com/chakirou18/AI-OfficeFlow/issues/15), [PR #30](https://github.com/chakirou18/AI-OfficeFlow/pull/30), source `e8705e1a0cd58da5595eefcd1939a225c57de99d`. On 2026-10-19, alert fired 20:30:47.872Z; agent invoked 20:31:02.787Z, diagnosed 20:31:02.877Z, cleared once 20:31:02.912Z, verified 20:31:02.970Z; normal user recovered 20:31:03.191Z. Twenty synthetic 503s, one clear, zero active tasks; duplicate replay suppressed. Cleanup disabled the gate. The proposal below is retained history, not permission to repeat.
+
 The custom Python agent is `app.oncall_agent.OnCallAgent`, automatically scheduled
 by the authenticated Alertmanager webhook. It is a deterministic agent workflow,
 not an LLM inference or a manually launched diagnosis script. Existing T14 rule,

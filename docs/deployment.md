@@ -1,5 +1,7 @@
 # T16 private release deployment
 
+Current status: T16 completed through PR #34. The chronology below preserves intermediate blockers and their later resolution. Final delivery/recovery is recorded under **Completed manual production promotion and acceptance evidence**. Docker was unavailable during the initial T18 audit; it was subsequently started for an isolated test project, which was stopped after validation. Existing T16 stacks stayed stopped during that validation. The separately authorized 2026-10-21 recovery and walkthroughs are documented under [supplementary T18 interactive walkthroughs](#supplementary-t18-interactive-walkthroughs); all six original containers were cleanly stopped afterward. Historical localhost reachability is not claimed current; see [handover](final-handover.md).
+
 Status: **all four T16 acceptance criteria verified on 2026-10-20**. Actual
 automatic private development and manual production delivery succeeded using the
 same tested digests. These are local-only synthetic release environments, not
@@ -333,3 +335,63 @@ foreground controller is required for future delivery. This evidence establishes
 the completed development/production demonstration of source release `a43d7dd`,
 not continuous availability, public HTTPS hosting or deployment of later docs commits.
 T17/T18 remain outside this task; no final grading score is claimed.
+
+
+## Supplementary T18 interactive walkthroughs
+
+On 2026-10-21, after explicit recovery and recording authorization, the original
+T16 Development and Production containers were recovered and used for two genuine
+browser walkthroughs. Publication was separately authorized. These recordings
+supplement the original T16 delivery videos, which remain unchanged.
+
+| Environment | Walkthrough | Endpoint during recording | Persisted requests / analyses / active tasks |
+| --- | --- | --- | --- |
+| Development | [44.76-second video](evidence/t18-development-walkthrough.webm) | `http://127.0.0.1:18080` | 9 / 9 / 0 |
+| Production | [44.64-second video](evidence/t18-production-walkthrough.webm) | `http://127.0.0.1:28080` | 3 / 3 / 0 |
+
+Both environments use the tested T16 release
+`a43d7ddbbc4bfcb347941371dd6a14f1334ceb36` and the exact API/frontend digests
+recorded in [T16 delivery JSON](evidence/t16-delivery.json). Retained container IDs,
+image identities, environment settings, separate database volumes/networks and
+loopback bindings were checked before startup. These are independent persisted
+databases running the same application features. The videos do not demonstrate a
+new deployment, production promotion or updated application release. Automatic
+development delivery and manual production promotion remain the historical T16
+events identified above. No public hosting or official grading points are claimed.
+
+Each 1280-by-720 silent video follows Overview, Requests, the Awaiting review
+filter, an existing synthetic request, its saved simulated pending proposal,
+System health, and a return to Overview. Visible mouse interactions operate the
+real rendered application. Browser-only captions identify the verified environment
+and localhost endpoint; an event-following cursor makes navigation visible.
+No mock screens or artificial data differences were introduced. Only the initial
+0.5 seconds of browser loading was trimmed; raw recordings remain private.
+
+Both candidates passed full-stream decoding and complete Edge playback at 8x,
+with no playback errors or dropped frames. Visual inspection covered 16 sampled
+playback frames per video across every scene and full-size stage captures.
+Reviewed content contains only synthetic records and pseudonymous handles, with
+no credentials, tokens, private configuration or sensitive logs displayed.
+Authentication occurred before recording. Business-write requests were blocked,
+and before/after complete-row hashes matched for requests, analyses, tasks,
+foundation checks and demo users; authorized session writes were the exception.
+
+The legacy System health panel still says LOCAL DEVELOPMENT/T04 in both
+environments. Captions explicitly identify the actual environment and legacy panel;
+this wording is not evidence of a different release. Existing proposals are
+simulated and inactive; no model call or approval occurred during recording.
+
+| File | SHA-256 |
+| --- | --- |
+| `t18-development-walkthrough.webm` | `5e596b9a773b04d2ba84da07ced02d6cfc881650a7d4ba736fce2b2178bc68e0` |
+| `t18-production-walkthrough.webm` | `d377a901506a2f95ddbec7f766bfaec1c87faff56585f56d963f9c12c753942b` |
+
+Before recovery, retained logical dumps restored successfully in isolated,
+network-disabled PostgreSQL 17.11 scratch databases, and offline copies of the
+stopped original volumes were verified. Backups and private verification data stay
+unpublished. Both original databases completed ordinary WAL recovery, reached
+schema `0006_human_decisions`, and returned API/database readiness HTTP 200.
+After recording, all six T16 containers stopped with exit code 0; both PostgreSQL
+logs confirmed clean shutdown. Their volumes and original evidence were preserved.
+No migration, rebuild, pull, controller activation or deployment occurred.
+Localhost applications are not claimed currently available after that shutdown.
